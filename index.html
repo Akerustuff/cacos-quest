@@ -210,6 +210,24 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .hist-pts{font-family:var(--ft);font-size:.84rem;color:var(--gold)}
 .hist-empty{text-align:center;color:var(--text3);font-size:.76rem;padding:14px;font-style:italic}
 .footer{text-align:center;padding:16px 0 4px;font-family:var(--fu);font-size:.56rem;letter-spacing:3px;color:var(--text3)}
+
+/* REGISTRO TAB */
+.reg-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:9px;transition:all .18s;position:relative;overflow:hidden;margin-bottom:5px}
+.reg-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2.5px;background:var(--ic,var(--border))}
+.reg-item.expired{cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.reg-item.expired:active{transform:scale(.97)}
+.reg-item.completed{opacity:.55}
+.reg-chk{width:22px;height:22px;flex-shrink:0;border-radius:6px;border:1.5px solid var(--ic,var(--border));display:flex;align-items:center;justify-content:center;font-size:.72rem;background:transparent}
+.reg-item.completed .reg-chk{background:var(--ic,var(--text3));border-color:var(--ic)}
+.reg-body{flex:1;min-width:0}
+.reg-name{font-family:var(--fu);font-weight:700;font-size:1rem;color:var(--text);line-height:1.3}
+.reg-item.completed .reg-name{text-decoration:line-through}
+.reg-meta{font-size:.74rem;color:var(--text3);font-style:italic;margin-top:2px}
+.reg-pts{font-family:var(--ft);font-size:1rem;color:var(--gold);flex-shrink:0;white-space:nowrap}
+.reg-player{font-family:var(--fu);font-size:.62rem;font-weight:700;letter-spacing:2px;padding:1px 6px;border-radius:10px;text-transform:uppercase;flex-shrink:0}
+.reg-player.mono{color:var(--mono);background:rgba(126,184,232,.12)}
+.reg-player.oso{color:var(--oso);background:rgba(232,168,126,.12)}
+.reg-empty{text-align:center;color:var(--text3);font-size:.82rem;padding:20px 0;font-style:italic}
 </style>
 </head>
 <body>
@@ -296,6 +314,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <button class="tab-btn active" id="tabD">Diarias</button>
     <button class="tab-btn" id="tabW">Semanales</button>
     <button class="tab-btn" id="tabM">Mensuales</button>
+    <button class="tab-btn" id="tabR">Registro</button>
   </div>
 
   <div id="tabContent"></div>
@@ -487,7 +506,20 @@ onSnapshot(ST_DOC, snap => {
 });
 
 // ── HELPERS ────────────────────────────────────
-const todayKey  = () => { const d=new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; };
+// Day resets at 6AM local time
+const todayKey = () => {
+  const d = new Date();
+  // If before 6AM, count as previous day
+  if (d.getHours() < 6) d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+};
+const yesterdayKey = () => {
+  const d = new Date();
+  // "yesterday" relative to 6AM boundary
+  if (d.getHours() < 6) d.setDate(d.getDate() - 2);
+  else d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+};
 const weekKey   = () => 'w' + Math.floor((Date.now()-ST.cycleStart)/(7*86400000));
 const weekNum   = () => Math.floor((Date.now()-ST.cycleStart)/(7*86400000));
 const cycleDay  = () => Math.min(Math.floor((Date.now()-ST.cycleStart)/86400000)+1,30);
@@ -559,11 +591,13 @@ document.getElementById('badgeOso').addEventListener('click', () => {
 document.getElementById('tabD').addEventListener('click', () => switchTab('daily'));
 document.getElementById('tabW').addEventListener('click', () => switchTab('weekly'));
 document.getElementById('tabM').addEventListener('click', () => switchTab('monthly'));
+document.getElementById('tabR').addEventListener('click', () => switchTab('registro'));
 function switchTab(t) {
   curTab = t;
-  document.getElementById('tabD').className = 'tab-btn' + (t==='daily'  ?' active':'');
-  document.getElementById('tabW').className = 'tab-btn' + (t==='weekly' ?' active':'');
-  document.getElementById('tabM').className = 'tab-btn' + (t==='monthly'?' active':'');
+  document.getElementById('tabD').className = 'tab-btn' + (t==='daily'   ?' active':'');
+  document.getElementById('tabW').className = 'tab-btn' + (t==='weekly'  ?' active':'');
+  document.getElementById('tabM').className = 'tab-btn' + (t==='monthly' ?' active':'');
+  document.getElementById('tabR').className = 'tab-btn' + (t==='registro'?' active':'');
   renderTab();
 }
 
@@ -603,9 +637,10 @@ function renderBP() {
 
 function renderTab() {
   const c = document.getElementById('tabContent');
-  if (curTab==='daily')   { c.innerHTML = buildDaily();   bindDaily(); }
-  if (curTab==='weekly')  { c.innerHTML = buildWeekly();  bindWeekly(); }
-  if (curTab==='monthly') { c.innerHTML = buildMonthly(); bindMonthly(); }
+  if (curTab==='daily')    { c.innerHTML = buildDaily();    bindDaily(); }
+  if (curTab==='weekly')   { c.innerHTML = buildWeekly();   bindWeekly(); }
+  if (curTab==='monthly')  { c.innerHTML = buildMonthly();  bindMonthly(); }
+  if (curTab==='registro') { c.innerHTML = buildRegistro(); bindRegistro(); }
 }
 
 // ── DAILY ──────────────────────────────────────
@@ -789,6 +824,121 @@ function newCycle() {
     date:new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})});
   ST = blank(); ST.history = hist; ST.cycleStart = Date.now();
   save(); renderAll(); toast('🌙 Nuevo ciclo iniciado');
+}
+
+// ── REGISTRO ───────────────────────────────────
+function buildRegistro() {
+  const dk  = todayKey();
+  const yk  = yesterdayKey();
+
+  // ── CADUCADAS: tareas del día anterior no completadas ──
+  const expired = [];
+  for (const t of DP) {
+    for (const p of ['mono','oso']) {
+      const k = `${t.id}_${p}`;
+      const doneYest = !!(ST.dailyDone[yk] && ST.dailyDone[yk][k]);
+      const doneToday = !!(ST.dailyDone[dk] && ST.dailyDone[dk][k]);
+      if (!doneYest && !doneToday) {
+        expired.push({t, p, type:'personal', pts:t.pts});
+      }
+    }
+  }
+  for (const t of DH) {
+    for (const p of ['mono','oso']) {
+      const k = `${t.id}_${p}`;
+      const doneYest = !!(ST.dailyHogarDone[yk] && ST.dailyHogarDone[yk][k]);
+      const doneToday = !!(ST.dailyHogarDone[dk] && ST.dailyHogarDone[dk][k]);
+      if (!doneYest && !doneToday) {
+        expired.push({t, p, type:'hogar', pts:t.pts});
+      }
+    }
+  }
+
+  // ── COMPLETADAS HOY: ambos jugadores ──
+  const completed = [];
+  for (const t of DP) {
+    for (const p of ['mono','oso']) {
+      const k = `${t.id}_${p}`;
+      if (ST.dailyDone[dk] && ST.dailyDone[dk][k]) {
+        completed.push({t, p, type:'personal', pts:t.pts});
+      }
+    }
+  }
+  for (const t of DH) {
+    for (const p of ['mono','oso']) {
+      const k = `${t.id}_${p}`;
+      if (ST.dailyHogarDone[dk] && ST.dailyHogarDone[dk][k]) {
+        completed.push({t, p, type:'hogar', pts:t.pts});
+      }
+    }
+  }
+
+  const ic = p => p==='mono' ? 'var(--mono)' : 'var(--oso)';
+
+  let h = '<div class="sec-hdr">⏰ Misiones Caducadas (ayer)</div>';
+  if (!expired.length) {
+    h += '<div class="reg-empty">¡Sin misiones caducadas! 🎉</div>';
+  } else {
+    h += '<div style="font-family:var(--fb);font-size:.8rem;color:var(--text3);margin-bottom:10px;font-style:italic">Puedes recuperarlas si las completaste y olvidaste marcarlas.</div>';
+    for (const {t, p, type, pts} of expired) {
+      h += `<div class="reg-item expired" style="--ic:${ic(p)}" data-id="${t.id}" data-p="${p}" data-type="${type}" data-day="yesterday">
+        <div class="reg-chk"></div>
+        <div class="reg-body">
+          <div class="reg-name">${t.name}</div>
+          <div class="reg-meta">${t.desc}</div>
+        </div>
+        <span class="reg-player ${p}">${p==='mono'?'🐒':'🐻'} ${p==='mono'?'Mono':'Oso'}</span>
+        <div class="reg-pts">+${pts}</div>
+      </div>`;
+    }
+  }
+
+  h += '<div class="sec-hdr" style="margin-top:16px">✅ Completadas Hoy</div>';
+  if (!completed.length) {
+    h += '<div class="reg-empty">Aún no hay misiones completadas hoy.</div>';
+  } else {
+    for (const {t, p, type, pts} of completed) {
+      h += `<div class="reg-item completed" style="--ic:${ic(p)}">
+        <div class="reg-chk">✓</div>
+        <div class="reg-body">
+          <div class="reg-name">${t.name}</div>
+          <div class="reg-meta">${t.desc}</div>
+        </div>
+        <span class="reg-player ${p}">${p==='mono'?'🐒':'🐻'} ${p==='mono'?'Mono':'Oso'}</span>
+        <div class="reg-pts">+${pts}</div>
+      </div>`;
+    }
+  }
+
+  return h;
+}
+
+function bindRegistro() {
+  document.querySelectorAll('.reg-item.expired').forEach(el => {
+    el.addEventListener('click', () => {
+      const {id:tid, p, type} = el.dataset;
+      // Mark as done for yesterday's key so XP is awarded
+      const yk = yesterdayKey(), k = `${tid}_${p}`, prev = curLv();
+      if (type === 'personal') {
+        const pts = byId(DP, tid).pts;
+        if (!ST.dailyDone[yk]) ST.dailyDone[yk] = {};
+        if (ST.dailyDone[yk][k]) {
+          delete ST.dailyDone[yk][k]; subXP(pts, p); toast(`-${pts} XP`);
+        } else {
+          ST.dailyDone[yk][k] = true; addXP(pts, p); toast(`+${pts} XP ⏰`);
+        }
+      } else {
+        const pts = byId(DH, tid).pts;
+        if (!ST.dailyHogarDone[yk]) ST.dailyHogarDone[yk] = {};
+        if (ST.dailyHogarDone[yk][k]) {
+          delete ST.dailyHogarDone[yk][k]; subXP(pts, p); toast(`-${pts} XP`);
+        } else {
+          ST.dailyHogarDone[yk][k] = true; addXP(pts, p); toast(`+${pts} XP ⏰`);
+        }
+      }
+      checkLv(prev); save(); renderTab();
+    });
+  });
 }
 
 setInterval(() => { if(currentPlayer) document.getElementById('cDay').textContent=cycleDay(); }, 60000);
