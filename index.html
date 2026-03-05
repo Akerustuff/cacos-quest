@@ -797,16 +797,31 @@ function bindDaily() {
 // ── WEEKLY ─────────────────────────────────────
 function buildWeekly() {
   const suf = wkSuffix();
-  let h = `<div class="sec-hdr">🏰 Misiones Mayores — Semana ${suf}</div>`;
+
+  // Separar grupos completos de incompletos
+  const activeGrps = [], doneGrps = [];
   for (const grp of WG) {
-    const done = grp.minors.filter(m=>isWMinor(m.id)).length;
-    const total = grp.minors.length, allDone = done===total;
-    const bk=`${grp.id}_buff`, buffCl=isBuff(bk), showBuff=grp.buff&&(allDone||buffCl);
+    const doneCnt = grp.minors.filter(m=>isWMinor(m.id)).length;
+    if (doneCnt === grp.minors.length) doneGrps.push({grp, doneCnt});
+    else activeGrps.push({grp, doneCnt});
+  }
+  const activeSolo = WS.filter(t => !isWSolo(t.id));
+  const doneSolo   = WS.filter(t =>  isWSolo(t.id));
+
+  let h = `<div class="sec-hdr">🏰 Misiones Mayores — Semana ${suf}</div>`;
+
+  // Grupos activos (no completados)
+  if (!activeGrps.length) {
+    h += '<div style="font-family:var(--fb);font-size:.82rem;color:var(--text3);padding:10px 0;font-style:italic">¡Todas las misiones mayores completadas! 🎉</div>';
+  }
+  for (const {grp, doneCnt} of activeGrps) {
+    const total = grp.minors.length;
+    const bk=`${grp.id}_buff`, buffCl=isBuff(bk), showBuff=grp.buff&&buffCl;
     h += `<div class="mission-group" id="grp_${grp.id}">
       <div class="mission-major" data-grp="${grp.id}">
-        <div class="maj-icon">${allDone?'✅':'🗺️'}</div>
+        <div class="maj-icon">🗺️</div>
         <div class="maj-body"><div class="maj-name">${grp.name} ${suf}</div><div class="maj-desc">${grp.desc}</div></div>
-        <div class="maj-prog${allDone?' complete':''}">${done}/${total}</div>
+        <div class="maj-prog">${doneCnt}/${total}</div>
         <div class="chevron">›</div>
       </div>
       <div class="minor-list">`;
@@ -825,14 +840,56 @@ function buildWeekly() {
     }
     h += '</div></div>';
   }
+
   h += `<div class="sec-hdr" style="margin-top:16px">⚔ Misiones Individuales — Semana ${suf}</div>`;
-  for (const t of WS) {
-    const done = isWSolo(t.id);
-    h += `<div class="solo-item${done?' done':''}" data-sid="${t.id}">
-      <div class="solo-chk">${done?'✓':''}</div>
-      <div class="solo-body"><div class="solo-name">${t.name}</div><div class="solo-desc">${t.desc}</div></div>
-      <div class="solo-pts">${done?'✓':'+'}${t.pts}</div></div>`;
+  if (!activeSolo.length) {
+    h += '<div style="font-family:var(--fb);font-size:.82rem;color:var(--text3);padding:10px 0;font-style:italic">¡Todas las misiones individuales completadas! 🎉</div>';
   }
+  for (const t of activeSolo) {
+    h += `<div class="solo-item" data-sid="${t.id}">
+      <div class="solo-chk"></div>
+      <div class="solo-body"><div class="solo-name">${t.name}</div><div class="solo-desc">${t.desc}</div></div>
+      <div class="solo-pts">+${t.pts}</div></div>`;
+  }
+
+  // ── SECCIÓN COMPLETADAS ──
+  const totalDone = doneGrps.length + doneSolo.length;
+  if (totalDone > 0) {
+    h += `<div class="sec-hdr" style="margin-top:20px">✅ Completadas esta semana <span style="font-size:.68rem;background:rgba(61,214,140,.1);color:#3dd68c;padding:1px 8px;border-radius:8px;border:1px solid rgba(61,214,140,.2);margin-left:4px">${totalDone}</span></div>`;
+
+    for (const {grp} of doneGrps) {
+      const bk=`${grp.id}_buff`, buffCl=isBuff(bk);
+      h += `<div class="mission-group" id="grp_${grp.id}" style="opacity:.55">
+        <div class="mission-major" data-grp="${grp.id}">
+          <div class="maj-icon">✅</div>
+          <div class="maj-body"><div class="maj-name">${grp.name} ${suf}</div><div class="maj-desc">${grp.desc}</div></div>
+          <div class="maj-prog complete">${grp.minors.length}/${grp.minors.length}</div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="minor-list">`;
+      for (const m of grp.minors) {
+        h += `<div class="minor-item done" data-mid="${m.id}" data-grp="${grp.id}">
+          <div class="minor-chk">✓</div>
+          <div class="minor-body"><div class="minor-name">${m.name}</div><div class="minor-desc">${m.desc}</div></div>
+          <div class="minor-pts">✓${m.pts}</div></div>`;
+      }
+      if (grp.buff && buffCl) {
+        h += `<div class="buff-zone show claimed" id="buff_${grp.id}">
+          <span>⚡</span>
+          <div class="buff-txt"><strong>Buff: ${grp.buff}</strong><br>Ya reclamado</div>
+          <div class="buff-pts">✓</div></div>`;
+      }
+      h += '</div></div>';
+    }
+
+    for (const t of doneSolo) {
+      h += `<div class="solo-item done" data-sid="${t.id}" style="opacity:.55">
+        <div class="solo-chk">✓</div>
+        <div class="solo-body"><div class="solo-name">${t.name}</div><div class="solo-desc">${t.desc}</div></div>
+        <div class="solo-pts">✓${t.pts}</div></div>`;
+    }
+  }
+
   return h;
 }
 function bindWeekly() {
@@ -884,16 +941,34 @@ function bindWeekly() {
 
 // ── MONTHLY ────────────────────────────────────
 function buildMonthly() {
+  const active = MM.filter(t => !isMthly(t.id));
+  const done   = MM.filter(t =>  isMthly(t.id));
+
   let h = '<div class="sec-hdr">🌕 Misiones del Gran Ciclo</div>';
   h += '<p style="font-family:var(--fb);font-size:.74rem;color:var(--text3);margin-bottom:12px;font-style:italic">Solo una vez por ciclo. ¡Cada misión sube un nivel completo!</p>';
-  for (const t of MM) {
-    const done = isMthly(t.id);
-    h += `<div class="monthly-item${done?' done':''}" data-mid="${t.id}">
-      <div class="m-chk">${done?'✓':'🔮'}</div>
+
+  if (!active.length) {
+    h += '<div style="font-family:var(--fb);font-size:.82rem;color:var(--text3);padding:10px 0;font-style:italic">¡Todas las misiones del ciclo completadas! 👑</div>';
+  }
+  for (const t of active) {
+    h += `<div class="monthly-item" data-mid="${t.id}">
+      <div class="m-chk">🔮</div>
       <div class="m-body"><div class="m-name">${t.name}</div><div class="m-desc">${t.desc}</div></div>
-      <div class="m-right"><span class="m-pn">${done?'✓':'+'+t.pts}</span><span class="m-ps">${done?'completada':'+1 NIVEL'}</span></div>
+      <div class="m-right"><span class="m-pn">+${t.pts}</span><span class="m-ps">+1 NIVEL</span></div>
     </div>`;
   }
+
+  if (done.length) {
+    h += `<div class="sec-hdr" style="margin-top:20px">✅ Completadas este ciclo <span style="font-size:.68rem;background:rgba(61,214,140,.1);color:#3dd68c;padding:1px 8px;border-radius:8px;border:1px solid rgba(61,214,140,.2);margin-left:4px">${done.length}</span></div>`;
+    for (const t of done) {
+      h += `<div class="monthly-item done" data-mid="${t.id}" style="opacity:.55">
+        <div class="m-chk">✓</div>
+        <div class="m-body"><div class="m-name">${t.name}</div><div class="m-desc">${t.desc}</div></div>
+        <div class="m-right"><span class="m-pn">✓</span><span class="m-ps">completada</span></div>
+      </div>`;
+    }
+  }
+
   return h;
 }
 function bindMonthly() {
