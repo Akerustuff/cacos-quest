@@ -285,7 +285,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       </div>
       <div class="s-div"></div>
       <div class="score-block">
-        <span class="s-label">Total XP</span>
+        <span class="s-label">⭐ Nenurios</span>
         <div class="s-num" id="sTotal">0</div>
       </div>
       <div class="s-div"></div>
@@ -307,7 +307,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="panel-hdr">⚔ Pase de Batalla<span class="panel-badge" id="bpBadge">Nivel 0</span></div>
     <div class="bp-grid" id="bpGrid"></div>
     <div class="bar-track"><div class="bar-fill" id="bpBar" style="width:0%"></div></div>
-    <div class="bp-prog"><span id="bpCur">0 XP</span><span id="bpNxt">— para Nv.1</span></div>
+    <div class="bp-prog"><span id="bpCur">0 Nenurios</span><span id="bpNxt">— para Nv.1</span></div>
   </div>
 
   <div class="tabs">
@@ -498,6 +498,7 @@ function save() {
 onSnapshot(ST_DOC, snap => {
   if (!snap.exists()) { syncStatus('online', 'Sincronizado ✓'); return; }
   ST = Object.assign(blank(), snap.data());
+  recalcXP();
   syncStatus('online', 'Sincronizado ✓');
   if (currentPlayer) renderAll();
 }, err => {
@@ -533,6 +534,61 @@ const isWMinor  = id => { const wk=weekKey(); return !!(ST.weeklyDone[wk]&&ST.we
 const isWSolo   = id => { const wk=weekKey(); return !!(ST.weeklyDone[wk]&&ST.weeklyDone[wk][id]); };
 const isMthly   = id => !!ST.monthlyDone[id];
 const isBuff    = id => !!ST.buffClaimed[id];
+// ── XP RECALCULADO (nunca se desbalancea) ──────
+function recalcXP() {
+  let total=0, mono=0, oso=0;
+
+  // Daily personal
+  for (const [dk, tasks] of Object.entries(ST.dailyDone||{})) {
+    for (const [k, v] of Object.entries(tasks||{})) {
+      if (!v) continue;
+      const [tid, p] = k.split('_').reduce((a,c,i,arr)=>i===arr.length-1?[arr.slice(0,-1).join('_'),c]:a,[]);
+      const t = byId(DP, tid); if(!t) continue;
+      total+=t.pts;
+      if(p==='mono') mono+=t.pts; else oso+=t.pts;
+    }
+  }
+  // Daily hogar
+  for (const [dk, tasks] of Object.entries(ST.dailyHogarDone||{})) {
+    for (const [k, v] of Object.entries(tasks||{})) {
+      if (!v) continue;
+      const parts = k.split('_'); const p = parts.pop(); const tid = parts.join('_');
+      const t = byId(DH, tid); if(!t) continue;
+      total+=t.pts;
+      if(p==='mono') mono+=t.pts; else oso+=t.pts;
+    }
+  }
+  // Weekly minors
+  for (const [wk, tasks] of Object.entries(ST.weeklyDone||{})) {
+    for (const [tid, v] of Object.entries(tasks||{})) {
+      if (!v) continue;
+      for (const grp of WG) {
+        const m = byId(grp.minors, tid);
+        if (m) { total+=m.pts; break; }
+      }
+      const ws = byId(WS, tid);
+      if (ws) total+=ws.pts;
+    }
+  }
+  // Buffs
+  for (const [bid, v] of Object.entries(ST.buffClaimed||{})) {
+    if (!v) continue;
+    const grpId = bid.replace('_buff','');
+    const grp = byId(WG, grpId);
+    if (grp && grp.buffPts) total+=grp.buffPts;
+  }
+  // Monthly
+  for (const [tid, v] of Object.entries(ST.monthlyDone||{})) {
+    if (!v) continue;
+    const t = byId(MM, tid); if(t) total+=t.pts;
+  }
+
+  ST.totalXP = total;
+  // Mono/Oso individual: solo diarias (las únicas asignadas a jugador)
+  ST.monoXP = mono;
+  ST.osoXP  = oso;
+}
+
 function addXP(n,p){ST.totalXP+=n;if(p==='mono')ST.monoXP+=n;else if(p==='oso')ST.osoXP+=n;}
 function subXP(n,p){ST.totalXP=Math.max(0,ST.totalXP-n);if(p==='mono')ST.monoXP=Math.max(0,ST.monoXP-n);else if(p==='oso')ST.osoXP=Math.max(0,ST.osoXP-n);}
 
@@ -609,7 +665,7 @@ document.getElementById('histBtn').addEventListener('click', () => {
 document.getElementById('newCycleBtn').addEventListener('click', newCycle);
 
 // ── RENDER ─────────────────────────────────────
-function renderAll() { renderScores(); renderBP(); renderTab(); renderHist(); }
+function renderAll() { recalcXP(); renderScores(); renderBP(); renderTab(); renderHist(); }
 
 function renderScores() {
   document.getElementById('sMono').textContent  = ST.monoXP;
@@ -631,8 +687,8 @@ function renderBP() {
   }).join('');
   const mx = BP[BP.length-1].xp;
   document.getElementById('bpBar').style.width = Math.min(ST.totalXP/mx*100,100)+'%';
-  document.getElementById('bpCur').textContent = ST.totalXP+' XP';
-  document.getElementById('bpNxt').textContent = cur<10 ? `${BP[cur].xp} XP → Nv.${BP[cur].lv}` : '¡LEYENDA MÁXIMA!';
+  document.getElementById('bpCur').textContent = ST.totalXP+' Nenurios';
+  document.getElementById('bpNxt').textContent = cur<10 ? `${BP[cur].xp} Nenurios → Nv.${BP[cur].lv}` : '¡LEYENDA MÁXIMA!';
 }
 
 function renderTab() {
@@ -675,13 +731,13 @@ function bindDaily() {
       if (type==='personal') {
         const pts = byId(DP,tid).pts;
         if (!ST.dailyDone[dk]) ST.dailyDone[dk]={};
-        if (ST.dailyDone[dk][k]) { delete ST.dailyDone[dk][k]; subXP(pts,p); toast(`-${pts} XP`); }
-        else { ST.dailyDone[dk][k]=true; addXP(pts,p); toast(`+${pts} XP`); }
+        if (ST.dailyDone[dk][k]) { delete ST.dailyDone[dk][k]; subXP(pts,p); toast(`-${pts} ★`); }
+        else { ST.dailyDone[dk][k]=true; addXP(pts,p); toast(`+${pts} ★`); }
       } else {
         const pts = byId(DH,tid).pts;
         if (!ST.dailyHogarDone[dk]) ST.dailyHogarDone[dk]={};
-        if (ST.dailyHogarDone[dk][k]) { delete ST.dailyHogarDone[dk][k]; subXP(pts,p); toast(`-${pts} XP`); }
-        else { ST.dailyHogarDone[dk][k]=true; addXP(pts,p); toast(`+${pts} XP`); }
+        if (ST.dailyHogarDone[dk][k]) { delete ST.dailyHogarDone[dk][k]; subXP(pts,p); toast(`-${pts} ★`); }
+        else { ST.dailyHogarDone[dk][k]=true; addXP(pts,p); toast(`+${pts} ★`); }
       }
       checkLv(prev); save(); renderAll();
     });
@@ -741,11 +797,11 @@ function bindWeekly() {
       const wk=weekKey(); if(!ST.weeklyDone[wk]) ST.weeklyDone[wk]={};
       const prev=curLv();
       if (ST.weeklyDone[wk][mid]) {
-        delete ST.weeklyDone[wk][mid]; subXP(m.pts,currentPlayer); toast(`-${m.pts} XP`);
+        delete ST.weeklyDone[wk][mid]; subXP(m.pts,currentPlayer); toast(`-${m.pts} ★`);
         const bk=`${grpId}_buff`;
         if (grp.buff && ST.buffClaimed[bk]) { delete ST.buffClaimed[bk]; subXP(grp.buffPts,currentPlayer); }
       } else {
-        ST.weeklyDone[wk][mid]=true; addXP(m.pts,currentPlayer); toast(`+${m.pts} XP`);
+        ST.weeklyDone[wk][mid]=true; addXP(m.pts,currentPlayer); toast(`+${m.pts} ★`);
       }
       checkLv(prev); save(); renderAll();
     });
@@ -760,7 +816,7 @@ function bindWeekly() {
       if (!grp.minors.every(m=>isWMinor(m.id))) { toast('⚠ Completa todas las misiones menores'); return; }
       const bk=`${grpId}_buff`; if(ST.buffClaimed[bk]) return;
       const prev=curLv();
-      ST.buffClaimed[bk]=true; addXP(grp.buffPts,currentPlayer); toast(`⚡ Buff +${grp.buffPts} XP`);
+      ST.buffClaimed[bk]=true; addXP(grp.buffPts,currentPlayer); toast(`⚡ Buff +${grp.buffPts} ★`);
       checkLv(prev); save(); renderAll();
     });
   });
@@ -769,8 +825,8 @@ function bindWeekly() {
       const task = byId(WS,el.dataset.sid); if(!task) return;
       const wk=weekKey(); if(!ST.weeklyDone[wk]) ST.weeklyDone[wk]={};
       const prev=curLv();
-      if (ST.weeklyDone[wk][task.id]) { delete ST.weeklyDone[wk][task.id]; subXP(task.pts,currentPlayer); toast(`-${task.pts} XP`); }
-      else { ST.weeklyDone[wk][task.id]=true; addXP(task.pts,currentPlayer); toast(`+${task.pts} XP`); }
+      if (ST.weeklyDone[wk][task.id]) { delete ST.weeklyDone[wk][task.id]; subXP(task.pts,currentPlayer); toast(`-${task.pts} ★`); }
+      else { ST.weeklyDone[wk][task.id]=true; addXP(task.pts,currentPlayer); toast(`+${task.pts} ★`); }
       checkLv(prev); save(); renderAll();
     });
   });
@@ -795,8 +851,8 @@ function bindMonthly() {
     el.addEventListener('click', () => {
       const task = byId(MM,el.dataset.mid); if(!task) return;
       const prev=curLv();
-      if (ST.monthlyDone[task.id]) { delete ST.monthlyDone[task.id]; subXP(task.pts,currentPlayer); toast(`-${task.pts} XP`); }
-      else { ST.monthlyDone[task.id]=true; addXP(task.pts,currentPlayer); toast(`+${task.pts} XP 🌕`); }
+      if (ST.monthlyDone[task.id]) { delete ST.monthlyDone[task.id]; subXP(task.pts,currentPlayer); toast(`-${task.pts} ★`); }
+      else { ST.monthlyDone[task.id]=true; addXP(task.pts,currentPlayer); toast(`+${task.pts} ★ 🌕`); }
       checkLv(prev); save(); renderAll();
     });
   });
@@ -831,26 +887,30 @@ function buildRegistro() {
   const dk  = todayKey();
   const yk  = yesterdayKey();
 
+  // Fechas formateadas
+  const fmtDate = key => {
+    const [y,m,d] = key.split('-');
+    return new Date(+y, +m-1, +d).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+  };
+  const fechaHoy  = fmtDate(dk);
+  const fechaAyer = fmtDate(yk);
+
   // ── CADUCADAS: tareas del día anterior no completadas ──
   const expired = [];
   for (const t of DP) {
     for (const p of ['mono','oso']) {
       const k = `${t.id}_${p}`;
-      const doneYest = !!(ST.dailyDone[yk] && ST.dailyDone[yk][k]);
+      const doneYest  = !!(ST.dailyDone[yk] && ST.dailyDone[yk][k]);
       const doneToday = !!(ST.dailyDone[dk] && ST.dailyDone[dk][k]);
-      if (!doneYest && !doneToday) {
-        expired.push({t, p, type:'personal', pts:t.pts});
-      }
+      if (!doneYest && !doneToday) expired.push({t, p, type:'personal', pts:t.pts});
     }
   }
   for (const t of DH) {
     for (const p of ['mono','oso']) {
       const k = `${t.id}_${p}`;
-      const doneYest = !!(ST.dailyHogarDone[yk] && ST.dailyHogarDone[yk][k]);
+      const doneYest  = !!(ST.dailyHogarDone[yk] && ST.dailyHogarDone[yk][k]);
       const doneToday = !!(ST.dailyHogarDone[dk] && ST.dailyHogarDone[dk][k]);
-      if (!doneYest && !doneToday) {
-        expired.push({t, p, type:'hogar', pts:t.pts});
-      }
+      if (!doneYest && !doneToday) expired.push({t, p, type:'hogar', pts:t.pts});
     }
   }
 
@@ -859,29 +919,25 @@ function buildRegistro() {
   for (const t of DP) {
     for (const p of ['mono','oso']) {
       const k = `${t.id}_${p}`;
-      if (ST.dailyDone[dk] && ST.dailyDone[dk][k]) {
-        completed.push({t, p, type:'personal', pts:t.pts});
-      }
+      if (ST.dailyDone[dk]?.[k]) completed.push({t, p, type:'personal', pts:t.pts});
     }
   }
   for (const t of DH) {
     for (const p of ['mono','oso']) {
       const k = `${t.id}_${p}`;
-      if (ST.dailyHogarDone[dk] && ST.dailyHogarDone[dk][k]) {
-        completed.push({t, p, type:'hogar', pts:t.pts});
-      }
+      if (ST.dailyHogarDone[dk]?.[k]) completed.push({t, p, type:'hogar', pts:t.pts});
     }
   }
 
   const ic = p => p==='mono' ? 'var(--mono)' : 'var(--oso)';
 
-  let h = '<div class="sec-hdr">⏰ Misiones Caducadas (ayer)</div>';
+  let h = `<div class="sec-hdr">⏰ Caducadas — ${fechaAyer}</div>`;
   if (!expired.length) {
     h += '<div class="reg-empty">¡Sin misiones caducadas! 🎉</div>';
   } else {
-    h += '<div style="font-family:var(--fb);font-size:.8rem;color:var(--text3);margin-bottom:10px;font-style:italic">Puedes recuperarlas si las completaste y olvidaste marcarlas.</div>';
+    h += '<div style="font-family:var(--fb);font-size:.8rem;color:var(--text3);margin-bottom:10px;font-style:italic">Toca para recuperar si la completaste y olvidaste marcarla.</div>';
     for (const {t, p, type, pts} of expired) {
-      h += `<div class="reg-item expired" style="--ic:${ic(p)}" data-id="${t.id}" data-p="${p}" data-type="${type}" data-day="yesterday">
+      h += `<div class="reg-item expired" style="--ic:${ic(p)}" data-id="${t.id}" data-p="${p}" data-type="${type}">
         <div class="reg-chk"></div>
         <div class="reg-body">
           <div class="reg-name">${t.name}</div>
@@ -893,7 +949,7 @@ function buildRegistro() {
     }
   }
 
-  h += '<div class="sec-hdr" style="margin-top:16px">✅ Completadas Hoy</div>';
+  h += `<div class="sec-hdr" style="margin-top:16px">✅ Completadas — ${fechaHoy}</div>`;
   if (!completed.length) {
     h += '<div class="reg-empty">Aún no hay misiones completadas hoy.</div>';
   } else {
@@ -923,17 +979,17 @@ function bindRegistro() {
         const pts = byId(DP, tid).pts;
         if (!ST.dailyDone[yk]) ST.dailyDone[yk] = {};
         if (ST.dailyDone[yk][k]) {
-          delete ST.dailyDone[yk][k]; subXP(pts, p); toast(`-${pts} XP`);
+          delete ST.dailyDone[yk][k]; subXP(pts, p); toast(`-${pts} ★`);
         } else {
-          ST.dailyDone[yk][k] = true; addXP(pts, p); toast(`+${pts} XP ⏰`);
+          ST.dailyDone[yk][k] = true; addXP(pts, p); toast(`+${pts} ★ ⏰`);
         }
       } else {
         const pts = byId(DH, tid).pts;
         if (!ST.dailyHogarDone[yk]) ST.dailyHogarDone[yk] = {};
         if (ST.dailyHogarDone[yk][k]) {
-          delete ST.dailyHogarDone[yk][k]; subXP(pts, p); toast(`-${pts} XP`);
+          delete ST.dailyHogarDone[yk][k]; subXP(pts, p); toast(`-${pts} ★`);
         } else {
-          ST.dailyHogarDone[yk][k] = true; addXP(pts, p); toast(`+${pts} XP ⏰`);
+          ST.dailyHogarDone[yk][k] = true; addXP(pts, p); toast(`+${pts} ★ ⏰`);
         }
       }
       checkLv(prev); save(); renderTab();
