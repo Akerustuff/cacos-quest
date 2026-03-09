@@ -533,10 +533,25 @@ const getCycleStart = () => {
   const cs = ST.cycleStart;
   if (cs?.toMillis) return cs.toMillis();
   if (cs?.seconds)  return cs.seconds * 1000;
-  return Number(cs) || Date.now();
+  const n = Number(cs);
+  // Nunca usar Date.now() como fallback — rompería weekKey
+  // Si no hay valor válido, usar epoch 0 (se verá cycleDay=1 pero no rompe)
+  return (n && n > 0) ? n : 0;
 };
-const weekKey   = () => 'w' + Math.floor((Date.now()-getCycleStart())/(7*86400000));
-const weekNum   = () => Math.floor((Date.now()-getCycleStart())/(7*86400000));
+
+// weekKey basada en lunes calendario — cada semana ISO tiene su propia key
+// independiente del cycleStart, así no se rompe si cycleStart es inválido
+const weekKey = () => {
+  const d = new Date();
+  if (d.getHours() < 6) d.setDate(d.getDate() - 1); // mismo ajuste de 6AM
+  // Número de semana ISO del año
+  const jan4 = new Date(d.getFullYear(), 0, 4);
+  const startOfW1 = new Date(jan4);
+  startOfW1.setDate(jan4.getDate() - ((jan4.getDay() + 6) % 7));
+  const wn = Math.floor((d - startOfW1) / (7 * 86400000));
+  return `${d.getFullYear()}-w${wn}`;
+};
+const weekNum = () => Math.floor((Date.now()-getCycleStart())/(7*86400000));
 // Fin del ciclo = último día del mes en que comenzó, a las 6AM
 const cycleEndDate = () => {
   const start = new Date(getCycleStart());
