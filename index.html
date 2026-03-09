@@ -539,19 +539,35 @@ const getCycleStart = () => {
   return (n && n > 0) ? n : 0;
 };
 
-// weekKey basada en lunes calendario — cada semana ISO tiene su propia key
-// independiente del cycleStart, así no se rompe si cycleStart es inválido
-const weekKey = () => {
-  const d = new Date();
-  if (d.getHours() < 6) d.setDate(d.getDate() - 1); // mismo ajuste de 6AM
-  // Número de semana ISO del año
-  const jan4 = new Date(d.getFullYear(), 0, 4);
-  const startOfW1 = new Date(jan4);
-  startOfW1.setDate(jan4.getDate() - ((jan4.getDay() + 6) % 7));
-  const wn = Math.floor((d - startOfW1) / (7 * 86400000));
-  return `${d.getFullYear()}-w${wn}`;
+// Devuelve el lunes de la semana actual (con corte a las 6AM del lunes)
+// Si es lunes antes de las 6AM, pertenece a la semana anterior
+const currentMondayMs = () => {
+  const now = new Date();
+  const d = new Date(now);
+  // Si es lunes y antes de las 6AM, retroceder al lunes anterior
+  if (d.getDay() === 1 && d.getHours() < 6) d.setDate(d.getDate() - 7);
+  // Retroceder hasta el lunes más reciente
+  const dayOfWeek = d.getDay(); // 0=dom, 1=lun ... 6=sab
+  const daysToMonday = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
+  d.setDate(d.getDate() - daysToMonday);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
 };
-const weekNum = () => Math.floor((Date.now()-getCycleStart())/(7*86400000));
+const weekKey = () => {
+  const d = new Date(currentMondayMs());
+  return `lun-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+};
+// Número de semana dentro del ciclo: cuántos lunes han pasado desde cycleStart
+const weekNum = () => {
+  const cs = getCycleStart();
+  const cycleMonday = new Date(cs);
+  // Retroceder al lunes de la semana de inicio del ciclo
+  const dow = cycleMonday.getDay();
+  const back = (dow === 0) ? 6 : dow - 1;
+  cycleMonday.setDate(cycleMonday.getDate() - back);
+  cycleMonday.setHours(0, 0, 0, 0);
+  return Math.floor((currentMondayMs() - cycleMonday.getTime()) / (7 * 86400000));
+};
 // Fin del ciclo = último día del mes en que comenzó, a las 6AM
 const cycleEndDate = () => {
   const start = new Date(getCycleStart());
