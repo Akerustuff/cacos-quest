@@ -56,7 +56,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .ps-btn.oso-btn{border-color:rgba(232,168,126,.3);color:var(--oso)}
 
 /* HEADER */
-.header{text-align:center;padding:18px 0 12px}
+.header{text-align:center;padding:calc(var(--safe-top) + 10px) 16px 12px;position:relative}
+.hdr-back{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:1.3rem;color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;padding:4px 8px;line-height:1}
+.hdr-sub{font-family:var(--fu);font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-top:2px}
 .hdr-icon{font-size:2.2rem}
 .hdr-title{font-family:var(--ft);font-size:1.7rem;font-weight:900;color:var(--gold-l);letter-spacing:3px;text-shadow:0 0 28px rgba(232,185,106,.4)}
 .hdr-players{display:flex;justify-content:center;gap:14px;margin-top:10px}
@@ -396,8 +398,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
 
   <div class="header">
+    <div class="hdr-back" id="appMenuBack">‹</div>
     <div class="hdr-icon">🏯</div>
     <div class="hdr-title">Cacos Quest</div>
+    <div class="hdr-sub">⚔️ Lista de Misiones</div>
     <div class="hdr-players">
       <span class="pbadge mono" id="badgeMono">🐒 Mono</span>
       <span class="pbadge oso"  id="badgeOso">🐻 Oso</span>
@@ -509,6 +513,10 @@ document.getElementById('menuProvisiones').addEventListener('click', function() 
 });
 document.getElementById('mCloseBtn').addEventListener('click', function() {
   document.getElementById('lvlModal').classList.remove('show');
+});
+document.getElementById('appMenuBack').addEventListener('click', function() {
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('menuScreen').classList.add('show');
 });
 </script>
 
