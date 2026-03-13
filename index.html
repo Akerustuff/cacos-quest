@@ -372,6 +372,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="prov-header">
     <div class="prov-back" id="provBack">‹</div>
     <div class="prov-header-title">📦 Lista de Provisiones</div>
+    <div id="provSyncDot" style="width:8px;height:8px;border-radius:50%;background:#3dd68c;flex-shrink:0;transition:background .3s"></div>
   </div>
   <div class="prov-body" id="provBody"></div>
   <button class="prov-add-btn" id="provAddBtn">＋</button>
@@ -555,6 +556,7 @@ document.getElementById('menuMisiones').addEventListener('click', function() {
 document.getElementById('menuProvisiones').addEventListener('click', function() {
   document.getElementById('menuScreen').classList.remove('show');
   document.getElementById('provScreen').classList.add('show');
+  // renderProvisions se llama desde el módulo cuando está listo
   if (window.__provReady) window.__provReady();
 });
 document.getElementById('mCloseBtn').addEventListener('click', function() {
@@ -1618,20 +1620,22 @@ let pvSaving = false; // evita guardados simultáneos
 
 // ── FIREBASE SYNC ─────────────────────────────
 onSnapshot(PROV_DOC, snap => {
+  // Flash sync dot green to confirm snapshot is arriving
+  const dot = document.getElementById('provSyncDot');
+  if (dot) { dot.style.background = '#f0c040'; setTimeout(() => { dot.style.background = '#3dd68c'; }, 600); }
+
   if (snap.exists()) {
     const d = snap.data();
-    // Siempre actualizar PV, venga de quien venga el cambio
     PV.categories = d.categories || DEFAULT_PROVS.categories;
     PV.items = d.items || DEFAULT_PROVS.items;
   } else {
     setDoc(PROV_DOC, { categories: PV.categories, items: PV.items });
   }
-  // Solo re-renderizar si la pantalla está visible
-  if (document.getElementById('provScreen').classList.contains('show')) {
-    renderProvisions();
-  }
+  renderProvisions();
 }, err => {
   console.error('Prov onSnapshot error:', err);
+  const dot = document.getElementById('provSyncDot');
+  if (dot) dot.style.background = '#e05555';
 });
 
 async function saveProv() {
