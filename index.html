@@ -259,6 +259,23 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .prov-cat-hdr.collapsed .prov-cat-chevron{transform:rotate(-90deg)}
 .prov-cat-body{overflow:hidden;transition:max-height .25s ease}
 .prov-cat-body.collapsed{max-height:0!important}
+.prov-row-actions{display:flex;gap:6px;padding:4px 4px 4px 0;justify-content:flex-end}
+.prov-act-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;-webkit-tap-highlight-color:transparent;transition:all .15s;flex-shrink:0}
+.prov-act-btn:active{transform:scale(.9)}
+.prov-act-btn.edit{color:var(--gold)}
+.prov-act-btn.del{color:#e05555}
+.prov-cat-actions{margin-left:auto;display:flex;gap:6px;align-items:center}
+.prov-cat-act-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--border2);background:rgba(0,0,0,.25);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:.7rem;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.prov-cat-act-btn:active{transform:scale(.9)}
+.prov-cat-act-btn.edit{color:var(--gold)}
+.prov-cat-act-btn.del{color:#e05555}
+/* Edit modal */
+.prov-edit-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:950;display:none;align-items:flex-end;justify-content:center}
+.prov-edit-modal-bg.show{display:flex}
+.prov-edit-modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px 20px 0 0;padding:20px 18px calc(var(--safe-bot)+20px);width:100%;max-width:480px}
+.prov-edit-modal-title{font-family:var(--ft);font-size:1rem;color:var(--gold-l);letter-spacing:2px;margin-bottom:16px;text-align:center}
+.prov-del-confirm{background:rgba(160,40,40,.18);border:1px solid rgba(160,40,40,.35);border-radius:10px;padding:12px;margin-bottom:14px;font-family:var(--fb);font-size:.85rem;color:#e8a0a0;text-align:center;display:none}
+.prov-del-confirm.show{display:block}
 .prov-table{width:100%;border-collapse:collapse;margin-bottom:4px}
 .prov-table th{font-family:var(--fu);font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:5px 8px 5px 4px;text-align:left;border-bottom:1px solid var(--border)}
 .prov-table th.th-hay{text-align:center;width:40px}
@@ -384,6 +401,27 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="prov-modal-btns">
       <button class="prov-modal-btn cancel" id="provModalCancel">Cancelar</button>
       <button class="prov-modal-btn confirm" id="provModalConfirm">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR/ELIMINAR PROVISIÓN -->
+<div class="prov-edit-modal-bg" id="provEditModalBg">
+  <div class="prov-edit-modal">
+    <div class="prov-edit-modal-title" id="provEditTitle">Editar</div>
+    <div class="prov-del-confirm" id="provDelConfirm"></div>
+    <div class="prov-field">
+      <label id="provEditLabel">Nombre</label>
+      <input type="text" id="provEditInput" placeholder="">
+    </div>
+    <div class="prov-modal-btns" id="provEditBtns">
+      <button class="prov-modal-btn cancel" id="provEditCancel">Cancelar</button>
+      <button class="prov-modal-btn cancel" id="provEditDelete" style="color:#e05555;border-color:rgba(160,40,40,.4)">🗑 Eliminar</button>
+      <button class="prov-modal-btn confirm" id="provEditSave">Guardar</button>
+    </div>
+    <div class="prov-modal-btns" id="provDelBtns" style="display:none">
+      <button class="prov-modal-btn cancel" id="provDelNo">← Cancelar</button>
+      <button class="prov-modal-btn confirm" id="provDelYes" style="background:linear-gradient(135deg,#a02828,#6b1515);color:#fff">Sí, eliminar</button>
     </div>
   </div>
 </div>
@@ -1577,19 +1615,24 @@ const DEFAULT_PROVS = {
 };
 
 let PV = { categories: [...DEFAULT_PROVS.categories], items: [...DEFAULT_PROVS.items] };
-let pvSaving = false;
+let pvSaving = false; // evita guardados simultáneos
 
 // ── FIREBASE SYNC ─────────────────────────────
 onSnapshot(PROV_DOC, snap => {
   if (snap.exists()) {
     const d = snap.data();
+    // Siempre actualizar PV, venga de quien venga el cambio
     PV.categories = d.categories || DEFAULT_PROVS.categories;
     PV.items = d.items || DEFAULT_PROVS.items;
   } else {
-    // Primera vez: guardar defaults
-    setDoc(PROV_DOC, PV);
+    setDoc(PROV_DOC, { categories: PV.categories, items: PV.items });
   }
-  renderProvisions();
+  // Solo re-renderizar si la pantalla está visible
+  if (document.getElementById('provScreen').classList.contains('show')) {
+    renderProvisions();
+  }
+}, err => {
+  console.error('Prov onSnapshot error:', err);
 });
 
 async function saveProv() {
@@ -1614,13 +1657,19 @@ function renderProvisions() {
     const isCollapsed = collapsedCats.has(cat.id);
     const colCls = isCollapsed ? ' collapsed' : '';
     h += `<div class="prov-cat-hdr${colCls}" data-catid="${cat.id}">
-      ${cat.name}<span class="prov-cat-chevron">▾</span>
+      ${cat.name}
+      <div class="prov-cat-actions">
+        <div class="prov-cat-act-btn edit" data-action="edit-cat" data-catid="${cat.id}" title="Editar categoría">✏</div>
+        <div class="prov-cat-act-btn del" data-action="del-cat" data-catid="${cat.id}" title="Eliminar categoría">🗑</div>
+        <span class="prov-cat-chevron">▾</span>
+      </div>
     </div>`;
     h += `<div class="prov-cat-body${colCls}" data-catbody="${cat.id}">`;
     h += `<table class="prov-table"><thead><tr>
       <th>Provisión</th>
       <th class="th-hay">Hay</th>
       <th class="th-qty">Cantidad</th>
+      <th style="width:64px"></th>
     </tr></thead><tbody>`;
     for (const item of items) {
       const rowCls = item.qty === 0 ? ' row-danger' : item.qty === 1 ? ' row-warn' : '';
@@ -1635,6 +1684,12 @@ function renderProvisions() {
             <div class="prov-qty-btn" data-action="dec" data-id="${item.id}">−</div>
             <div class="prov-qty-val${numCls}">${item.qty}</div>
             <div class="prov-qty-btn" data-action="inc" data-id="${item.id}">＋</div>
+          </div>
+        </td>
+        <td>
+          <div class="prov-row-actions">
+            <div class="prov-act-btn edit" data-action="edit-item" data-id="${item.id}" title="Editar">✏</div>
+            <div class="prov-act-btn del" data-action="del-item" data-id="${item.id}" title="Eliminar">🗑</div>
           </div>
         </td>
       </tr>`;
@@ -1673,7 +1728,18 @@ function bindProvisions() {
   document.querySelectorAll('[data-action]').forEach(el => {
     el.addEventListener('click', e => {
       e.stopPropagation();
-      const {action, id} = el.dataset;
+      const {action, id, catid} = el.dataset;
+      if (action === 'edit-cat') { openEditModal('cat', catid); return; }
+      if (action === 'del-cat')  { openEditModal('cat', catid); 
+        // jump straight to confirm
+        setTimeout(() => document.getElementById('provEditDelete').click(), 50);
+        return;
+      }
+      if (action === 'edit-item') { openEditModal('item', id); return; }
+      if (action === 'del-item')  { openEditModal('item', id);
+        setTimeout(() => document.getElementById('provEditDelete').click(), 50);
+        return;
+      }
       const item = PV.items.find(i => i.id === id);
       if (!item) return;
       if (action === 'hay') { item.hay = !item.hay; }
@@ -1730,6 +1796,77 @@ document.getElementById('provModalConfirm').addEventListener('click', () => {
   saveProv();
   closeProvModal();
   renderProvisions();
+});
+
+// ── MODAL EDITAR/ELIMINAR ─────────────────────
+let editCtx = null; // {type:'item'|'cat', id}
+
+function openEditModal(type, id) {
+  const isItem = type === 'item';
+  const target = isItem ? PV.items.find(i => i.id === id) : PV.categories.find(c => c.id === id);
+  if (!target) return;
+  editCtx = {type, id};
+  document.getElementById('provEditTitle').textContent = isItem ? 'Editar Provisión' : 'Editar Categoría';
+  document.getElementById('provEditLabel').textContent = isItem ? 'Nombre de la provisión' : 'Nombre de la categoría';
+  document.getElementById('provEditInput').value = target.name;
+  document.getElementById('provDelConfirm').classList.remove('show');
+  document.getElementById('provEditBtns').style.display = 'flex';
+  document.getElementById('provDelBtns').style.display = 'none';
+  document.getElementById('provEditModalBg').classList.add('show');
+  setTimeout(() => document.getElementById('provEditInput').focus(), 80);
+}
+function closeEditModal() {
+  document.getElementById('provEditModalBg').classList.remove('show');
+  editCtx = null;
+}
+
+document.getElementById('provEditCancel').addEventListener('click', closeEditModal);
+document.getElementById('provEditModalBg').addEventListener('click', e => {
+  if (e.target === document.getElementById('provEditModalBg')) closeEditModal();
+});
+
+document.getElementById('provEditSave').addEventListener('click', () => {
+  if (!editCtx) return;
+  const val = document.getElementById('provEditInput').value.trim();
+  if (!val) { document.getElementById('provEditInput').focus(); return; }
+  if (editCtx.type === 'item') {
+    const item = PV.items.find(i => i.id === editCtx.id);
+    if (item) item.name = val;
+  } else {
+    const cat = PV.categories.find(c => c.id === editCtx.id);
+    if (cat) cat.name = val;
+  }
+  saveProv(); closeEditModal(); renderProvisions();
+});
+
+document.getElementById('provEditDelete').addEventListener('click', () => {
+  if (!editCtx) return;
+  const isItem = editCtx.type === 'item';
+  const name = isItem
+    ? PV.items.find(i => i.id === editCtx.id)?.name
+    : PV.categories.find(c => c.id === editCtx.id)?.name;
+  const extra = !isItem ? ' y todas sus provisiones' : '';
+  document.getElementById('provDelConfirm').textContent = `¿Eliminar "${name}"${extra}?`;
+  document.getElementById('provDelConfirm').classList.add('show');
+  document.getElementById('provEditBtns').style.display = 'none';
+  document.getElementById('provDelBtns').style.display = 'flex';
+});
+
+document.getElementById('provDelNo').addEventListener('click', () => {
+  document.getElementById('provDelConfirm').classList.remove('show');
+  document.getElementById('provEditBtns').style.display = 'flex';
+  document.getElementById('provDelBtns').style.display = 'none';
+});
+
+document.getElementById('provDelYes').addEventListener('click', () => {
+  if (!editCtx) return;
+  if (editCtx.type === 'item') {
+    PV.items = PV.items.filter(i => i.id !== editCtx.id);
+  } else {
+    PV.items = PV.items.filter(i => i.cat !== editCtx.id);
+    PV.categories = PV.categories.filter(c => c.id !== editCtx.id);
+  }
+  saveProv(); closeEditModal(); renderProvisions();
 });
 
 // ── NAVEGACIÓN ────────────────────────────────
