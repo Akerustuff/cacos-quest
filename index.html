@@ -1655,7 +1655,8 @@ function renderProvisions() {
   if (!body) return;
   let h = '';
   for (const cat of PV.categories) {
-    const items = PV.items.filter(i => i.cat === cat.id);
+    const items = PV.items.filter(i => i.cat === cat.id)
+      .sort((a, b) => a.name.localeCompare(b.name, 'es', {sensitivity:'base'}));
     if (!items.length) continue;
     const isCollapsed = collapsedCats.has(cat.id);
     const colCls = isCollapsed ? ' collapsed' : '';
