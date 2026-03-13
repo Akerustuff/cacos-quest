@@ -1505,19 +1505,10 @@ setInterval(() => {
 
 <!-- PROVISIONES MODULE -->
 <script type="module">
-import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, doc, onSnapshot, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAbGHJHmiS8FswN3jZzrGibzZqCnytl1e4",
-  authDomain: "queslog-monoso.firebaseapp.com",
-  projectId: "queslog-monoso",
-  storageBucket: "queslog-monoso.firebasestorage.app",
-  messagingSenderId: "916048511765",
-  appId: "1:916048511765:web:8a7acfd5d70c48ea8e8e34"
-};
-const app2 = initializeApp(firebaseConfig, 'prov-app');
-const db2  = getFirestore(app2);
+const db2  = getFirestore(getApp());
 const PROV_DOC = doc(db2, 'questlog', 'provisiones');
 
 // ── DATOS INICIALES ────────────────────────────
