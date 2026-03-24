@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+:root {
+    --bg: #080b10;
+    --surface: #0d1219;
+    --border: #1e2d3d;
+    --border2: #243444;
+    --gold: #c9943a;
+    --gold-l: #e8b96a;
+    --text: #d4c9b8;
+    --text2: #8a9aaa;
+    --text3: #4a5a6a;
+    --mono: #7eb8e8;
+    --oso: #e8a87e;
+    --ft: 'Cinzel', serif; /* ft es font title */
+    --fu: 'Rajdhani', sans-serif; /* fu es font ui */
+    --fb: 'Crimson Pro', serif; /* fb es font body */
+}
+
+* {                                                                                                                                                                                                                                                                 
+    margin: 0;                                                                                                                                                                                                                                                        
+    padding: 0;   
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--fb);
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .screen {
+    height: 100vh;
+    padding: 20px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* ── Selección de jugador ── */
+  .player-buttons {
+    display: flex;
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .player-buttons button {
+    width: 150px;
+    height: 150px;
+    border-radius: 20px;
+    border: 2px solid var(--border2);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--ft);
+    font-size: 1rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s;
+  }
+  
+  .player-buttons button:first-child{
+    border-color: rgba(126, 184, 232, 0.3);
+    color: var(--mono);
+  }
+
+  .player-buttons button:last-child{
+    border-color: rgba(232, 168, 126, 0.3);
+    color: var(--oso);
+  }
+
+ /* ── Menú principal ── */
+
+ .menu-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+ }
+
+ .menu-options{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+ }
+
+ .menu-options button {
+    width: 100%;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--fu);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+ }
