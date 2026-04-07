@@ -5,6 +5,18 @@
 
     // Mostrar la pantalla pedida
     document.getElementById('screen-' + screen).classList.remove('hidden');
+
+    // Mostrar las misiones diarias por defecto al entrar a Misiones
+    if (screen === 'missions') {
+      cambiarTab('diarias');  
+    }
+    if (screen === 'cycles') {
+      renderizarCiclos();
+    }
+    if (screen === 'provisions') {
+      categoriasAbiertas.clear();
+      renderizarProvisiones();
+  }
   }
 
   function selectPlayer(playerId) {
@@ -25,6 +37,8 @@
 
   // Arranque: se ejecuta cuando carga la app
   window.onload = function () {
+    verificarCambioMes();
+
     const hasSession = Players.loadSession();
 
     if (hasSession) {
@@ -34,3 +48,4 @@
       navigate('player');
     }
   };
+

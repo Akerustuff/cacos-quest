@@ -1,65 +1,235 @@
-<!DOCTYPE html>                                                                                                                                                                                                                                                     
-  <html lang="es">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Cacos Quest</title>
-    <link rel="stylesheet" href="css/styles.css">
-  </head>
-  <body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Cacos Quest</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
 
-    <!-- PANTALLA: Selección de jugador -->
-    <div id="screen-player" class="screen">
-      <h1>Cacos Quest</h1>
-      <p>¿Quién eres?</p>
-      <div class="player-buttons">
-        <button onclick="selectPlayer('mono')">🐒 Mono</button>
-        <button onclick="selectPlayer('oso')">🐻 Oso</button>
+  <!-- PANTALLA: Selección de jugador -->
+  <div id="screen-player" class="screen">
+    <div class="player-select-title">Cacos Quest</div>
+    <div class="player-select-subtitle">¿Quién eres?</div>
+    <div class="player-select-btns">
+      <div class="player-select-btn mono-btn" onclick="selectPlayer('mono')">
+        <span class="player-select-icon">🐵</span>
+        <span class="player-select-name">Mono</span>
+      </div>
+      <div class="player-select-btn oso-btn" onclick="selectPlayer('oso')">
+        <span class="player-select-icon">🐻</span>
+        <span class="player-select-name">Oso</span>
       </div>
     </div>
+  </div>
 
-    <!-- PANTALLA: Menú principal -->
-    <div id="screen-menu" class="screen hidden">
-      <div class="menu-header">
-        <span id="player-name"></span>
-        <button onclick="changePlayer()">Cambiar jugador</button>
+  <!-- PANTALLA: Menú principal -->
+  <div id="screen-menu" class="screen hidden">
+    <div class="menu-header">
+      <span id="player-name"></span>
+      <button onclick="changePlayer()">Cambiar jugador</button>
+    </div>
+    <div class="menu-options">
+      <button onclick="navigate('missions')">⚔️ Misiones</button>
+      <button onclick="navigate('provisions')">🛒 Provisiones</button>
+      <button onclick="navigate('battlepass')">🏆 Pase de batalla</button>
+      <button onclick="navigate('cycles')">🌖 Ciclos</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA: Misiones -->
+  <div id="screen-missions" class="screen hidden">
+    <div class="missions-header">
+      <button class="back-btn" onclick="navigate('menu')">← Volver</button>
+      <h2 class="screen-title">Misiones</h2>
+      <span id="puntos-display">⭐ 0 Nenurios</span>
+    </div>
+    <div class="missions-tabs">
+      <button class="tab-btn active" onclick="cambiarTab('diarias')">Diarias</button>
+      <button class="tab-btn" onclick="cambiarTab('semanales')">Semanales</button>
+      <button class="tab-btn" onclick="cambiarTab('mensuales')">Mensuales</button>
+    </div>
+    <div id="missions-container">
+      <!-- Las misiones se renderizan aquí con JavaScript -->
+    </div>
+  </div>
+
+  <!-- PANTALLA: Provisiones -->
+  <div id="screen-provisions" class="screen hidden">
+    <div class="prov-header">
+      <button class="back-btn" onclick="navigate('menu')">← Volver</button>
+      <div class="prov-header-titulo">📦 Provisiones</div>
+    </div>
+    <div class="prov-body" id="prov-body"></div>
+    <div class="prov-fab-menu" id="prov-fab-menu">
+      <button class="prov-fab-opcion" onclick="abrirModalAgregarCategoria()">🗂 Categoría</button>
+      <button class="prov-fab-opcion" onclick="abrirModalAgregar()">📦 Provisión</button>
+    </div>
+    <button class="prov-btn-agregar" onclick="toggleFabMenu()">＋</button>
+  </div>
+
+  <!-- PANTALLA: Pase de batalla -->
+  <div id="screen-battlepass" class="screen hidden">
+    <button onclick="navigate('menu')">← Volver</button>
+    <h2>Pase de batalla</h2>
+    <p>Próximamente...</p>
+  </div>
+
+  <!-- PANTALLA: Ciclos -->
+  <div id="screen-cycles" class="screen hidden">
+    <div class="cycles-header">
+      <button class="back-btn" onclick="navigate('menu')">← Volver</button>
+      <h2 class="screen-title">Ciclos</h2>
+    </div>
+    <div class="ciclo-actual">
+      <div class="ciclo-actual-info">
+        <span id="ciclo-numero" class="ciclo-actual-numero">Ciclo 1</span>
+        <span id="ciclo-periodo" class="ciclo-actual-fecha">Periodo: —</span>
       </div>
-      <div class="menu-options">
-        <button onclick="navigate('missions')">⚔️ Misiones</button>
-        <button onclick="navigate('provisions')">🛒 Provisiones</button>
-        <button onclick="navigate('battlepass')">🏆 Pase de batalla</button>
+      <div class="ciclo-actual-stats">
+        <span id="ciclo-puntos-mono">🐵 0 Nenurios</span>
+        <span id="ciclo-puntos-oso">🐻 0 Nenurios</span>
+        <span id="ciclo-puntos">0 ⭐Nenurios Totales</span>
+        <span id="ciclo-nivel">Nivel 0</span>
+      </div>
+      <button class="finalizar-ciclo-btn" onclick="confirmarFinalizarCiclo()">Finalizar Ciclo</button>
+    </div>
+    <h3 class="ciclos-titulo-registro">Historial</h3>
+    <div id="ciclos-registro"></div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <!-- App -->
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/players.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/missions.js"></script>
+  <script src="js/cycles.js"></script>
+  <script src="js/provisions.js"></script>
+
+  <!-- MODAL: Buff -->
+  <div id="modal-buff" class="modal-overlay hidden">
+    <div class="modal-contenido">
+      <div class="modal-titulo">🎉 ¡Buff conseguido! 🎉</div>
+      <div class="modal-buff-nombre">
+        <span id="modal-buff-nombre"></span>
+      </div>
+      <div class="modal-buff-puntos">
+        <span id="modal-buff-puntos"></span> ⭐ Nenurios
+      </div>
+      <button class="modal-btn-cerrar" onclick="cerrarModalBuff()">¡Genial!</button>
+    </div>
+  </div>
+
+  <div id="toast-xp" class="toast-xp hidden">
+    <span id="toast-xp-texto">+0 pts</span>
+  </div>
+
+  <!-- MODAL: Confirmar finalizar ciclo -->
+  <div id="modal-finalizar-ciclo" class="modal-overlay hidden">
+    <div class="modal-contenido">
+      <div class="modal-titulo">⚠️ Finalizar Ciclo</div>
+      <p class="modal-texto">Se guardarán los puntos actuales y se reiniciarán todas las misiones. ¿Estás seguro?</p>
+      <div class="modal-btns">
+        <button class="modal-btn-secundario" onclick="cerrarModalFinalizarCiclo()">Cancelar</button>
+        <button class="modal-btn-primario" onclick="confirmarYFinalizar()">Finalizar</button>
       </div>
     </div>
+  </div>
 
-    <!-- PANTALLA: Misiones -->
-    <div id="screen-missions" class="screen hidden">
-      <button onclick="navigate('menu')">← Volver</button>
-      <h2>Misiones</h2>
-      <p>Próximamente...</p>
+  <!-- MODAL: Agregar provisión -->
+  <div class="prov-modal-fondo" id="prov-modal-agregar">
+    <div class="prov-modal">
+      <div class="prov-modal-titulo">Nueva Provisión</div>
+      <div class="prov-campo">
+        <label>Categoría</label>
+        <select id="prov-select-categoria"></select>
+      </div>
+      <div class="prov-campo">
+        <label>Provisión</label>
+        <input type="text" id="prov-input-nombre" placeholder="Nombre del artículo...">
+      </div>
+      <div class="prov-modal-botones">
+        <button class="prov-modal-btn cancelar" onclick="cerrarModalAgregar()">Cancelar</button>
+        <button class="prov-modal-btn confirmar" onclick="confirmarAgregar()">Agregar</button>
+      </div>
     </div>
+  </div>
 
-    <!-- PANTALLA: Provisiones -->
-    <div id="screen-provisions" class="screen hidden">
-      <button onclick="navigate('menu')">← Volver</button>
-      <h2>Provisiones</h2>
-      <p>Próximamente...</p>
+  <!-- MODAL: Editar / eliminar provisión -->
+  <div class="prov-modal-fondo" id="prov-modal-editar">
+    <div class="prov-modal">
+      <div class="prov-modal-titulo" id="prov-editar-titulo">Editar</div>
+      <div class="prov-campo">
+        <label id="prov-editar-label">Nombre</label>
+        <input type="text" id="prov-input-editar" placeholder="">
+      </div>
+      <div class="prov-modal-botones" id="prov-editar-botones">
+        <button class="prov-modal-btn cancelar" onclick="cerrarModalEditar()">Cancelar</button>
+        <button class="prov-modal-btn eliminar" onclick="pedirConfirmacionEliminar()">🗑 Eliminar</button>
+        <button class="prov-modal-btn confirmar" onclick="confirmarEditar()">Guardar</button>
+      </div>
+      <div class="prov-modal-botones" id="prov-confirmar-eliminar-botones" style="display:none">
+        <button class="prov-modal-btn cancelar" onclick="cancelarEliminar()">← Cancelar</button>
+        <button class="prov-modal-btn peligro" onclick="confirmarEliminar()">Sí, eliminar</button>
+      </div>
     </div>
+  </div>
 
-    <!-- PANTALLA: Pase de batalla -->
-    <div id="screen-battlepass" class="screen hidden">
-      <button onclick="navigate('menu')">← Volver</button>
-      <h2>Pase de batalla</h2>
-      <p>Próximamente...</p>
+  <!-- MODAL: Agregar categoría -->
+  <div class="prov-modal-fondo" id="prov-modal-agregar-categoria">
+    <div class="prov-modal">
+      <div class="prov-modal-titulo">Nueva Categoría</div>
+      <div class="prov-campo">
+        <label>Icono (emoji)</label>
+        <input type="text" id="prov-cat-input-icono" placeholder="Ej: 🛒">
+      </div>
+      <div class="prov-campo">
+        <label>Nombre</label>
+        <input type="text" id="prov-cat-input-nombre" placeholder="Nombre de la categoría...">
+      </div>
+      <div class="prov-modal-botones">
+        <button class="prov-modal-btn cancelar" onclick="cerrarModalAgregarCategoria()">Cancelar</button>
+        <button class="prov-modal-btn confirmar" onclick="confirmarAgregarCategoria()">Agregar</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <!-- MODAL: Editar categoría -->
+  <div class="prov-modal-fondo" id="prov-modal-editar-categoria">
+    <div class="prov-modal">
+      <div class="prov-modal-titulo">Editar Categoría</div>
+      <div class="prov-campo">
+        <label>Icono (emoji)</label>
+        <input type="text" id="prov-edit-cat-icono" placeholder="Ej: 🛒">
+      </div>
+      <div class="prov-campo">
+        <label>Nombre</label>
+        <input type="text" id="prov-edit-cat-nombre" placeholder="Nombre de la categoría...">
+      </div>
+      <div class="prov-modal-botones">
+        <button class="prov-modal-btn cancelar" onclick="cerrarModalEditarCategoria()">Cancelar</button>
+        <button class="prov-modal-btn confirmar" onclick="confirmarEditarCategoria()">Guardar</button>
+      </div>
+    </div>
+  </div>
 
-    <!-- App -->
-    <script src="js/storage.js"></script>
-    <script src="js/players.js"></script>
-    <script src="js/app.js"></script>
-
-  </body>
-  </html>
+  <!-- MODAL: Eliminar categoría -->
+  <div class="prov-modal-fondo" id="prov-modal-eliminar-categoria">
+    <div class="prov-modal">
+      <div class="prov-modal-titulo">Eliminar Categoría</div>
+      <p class="prov-modal-advertencia" id="prov-eliminar-cat-texto"></p>
+      <div class="prov-modal-botones">
+        <button class="prov-modal-btn cancelar" onclick="cerrarModalEliminarCategoria()">Cancelar</button>
+        <button class="prov-modal-btn peligro" onclick="confirmarEliminarCategoria()">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+  
+</body>
+</html>
