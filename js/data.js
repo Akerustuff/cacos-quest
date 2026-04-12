@@ -155,16 +155,30 @@ const MISIONES_SEMANALES_SUELTAS = [
   ];
 
   const NIVELES_BATTLE_PASS = [
-      { nivel: 1,  xpRequerido: 50,   icono: '🌿', nombre: 'Aprendiz' },
-      { nivel: 2,  xpRequerido: 150,  icono: '🗡️', nombre: 'Guerrero' },
-      { nivel: 3,  xpRequerido: 300,  icono: '🔥', nombre: 'En Llamas' },
-      { nivel: 4,  xpRequerido: 500,  icono: '🌙', nombre: 'Nocturno' },
-      { nivel: 5,  xpRequerido: 750,  icono: '💎', nombre: 'Diamante' },
-      { nivel: 6,  xpRequerido: 1100, icono: '⚡', nombre: 'Relámpago' },
-      { nivel: 7,  xpRequerido: 1500, icono: '🦅', nombre: 'Águila' },
-      { nivel: 8,  xpRequerido: 2000, icono: '🌟', nombre: 'Estelar' },
-      { nivel: 9,  xpRequerido: 2700, icono: '🧠', nombre: 'Sabio' },
-      { nivel: 10, xpRequerido: 3500, icono: '👑', nombre: 'Leyenda' }
+      { nivel: 1,  xpRequerido: 80,   icono: '🌳', nombre: 'Bosque Burbuja', premios: [
+        { nombre: 'Picnic en el bosque', emoji: '🧺', costo: 200},
+        { nombre: 'Néctar Helado', emoji: '🍦', costo: 80},
+        { nombre: 'Pase del festival de la ciudad', emoji: '🎫', costo: 300}
+      ]
+    },
+      { nivel: 2,  xpRequerido: 660,  icono: '🏙️', nombre: 'Monópolis', premios: [
+        { nombre: 'Almuerzo en el MoniMall', emoji: '🍽️', costo: 200},
+        { nombre: 'Brunch motinal', emoji: '☕', costo: 250},
+        { nombre: 'Néctar Helado', emoji: '🍦', costo: 80},
+        { nombre: 'Hobbybox de plata', emoji: '🥈', costo: 300}
+      ] },
+      
+      { nivel: 3,  xpRequerido: 1490,  icono: '🏞️', nombre: 'Lago Marquesa', premios: [
+        { nombre: 'Panqueques frente al lago', emoji: '🥞', costo: 200},
+        { nombre: 'Néctar Helado', emoji: '🍦', costo: 80},
+        { nombre: 'Hobbybox de plata', emoji: '🥈', costo: 300}
+      ]},
+      { nivel: 4,  xpRequerido: 2070,  icono: '☃️', nombre: 'Valle Nevoso', premios: [
+        { nombre: 'Cena al calor de la chimenea', emoji: '🍽️', costo: 200},
+        { nombre: 'Néctar Helado', emoji: '🍦', costo: 80},
+        { nombre: 'Brunch motinal', emoji: '☕', costo: 250},
+        { nombre: 'Hobbybox de oro', emoji: '🏆', costo: 1000}
+      ]},
   ];
 
   const PROVISIONES_DEFAULT = {

@@ -16,7 +16,10 @@
     if (screen === 'provisions') {
       categoriasAbiertas.clear();
       renderizarProvisiones();
-  }
+    }
+    if (screen === 'battlepass') {
+      renderizarBattlepass();
+    }
   }
 
   function selectPlayer(playerId) {

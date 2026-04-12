@@ -1055,4 +1055,249 @@ body {
       line-height: 1.5;
   }
 
+  /* ── Battle Pass ── */
+
+  #screen-battlepass {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+  }
+
+  .bp-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+  }
+
+  .bp-nivel-badge {
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(201, 148, 58, 0.1);
+      border: 1px solid rgba(201, 148, 58, 0.25);
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+  }
+
+  .bp-puntos-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 14px;
+  }
+
+  .bp-jugador {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+  }
+
+  .bp-jugador-emoji { font-size: 1.4rem; }
+
+  .bp-jugador-label {
+      font-family: var(--font-ui);
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text3);
+  }
+
+  .bp-total {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+  }
+
+  #bp-xp-total, #bp-puntos-total {
+      font-family: var(--font-title);
+      font-size: 1.6rem;
+      color: var(--gold-l);
+  }
+
+  .bp-total-label {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text3);
+  }
+
+  .bp-nenurios-label {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      color: var(--text2);
+  }
+
+  /* Tarjetas de nivel */
+
+  .bp-nivel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+  }
+
+  .bp-nivel-card.desbloqueado {
+      border-color: var(--gold);
+      background: rgba(201, 148, 58, 0.05);
+  }
+
+  .bp-nivel-card.siguiente {
+      border-color: var(--gold);
+      animation: bp-pulse 2.5s ease-in-out infinite;
+  }
+
+  .bp-nivel-card.bloqueado {
+      opacity: 0.45;
+  }
+
+  @keyframes bp-pulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(201, 148, 58, 0.2); }
+      50%       { box-shadow: 0 0 18px rgba(201, 148, 58, 0.5); }
+  }
+
+  .bp-nivel-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+  }
+
+  .bp-nivel-icono { font-size: 1.6rem; }
+
+  .bp-nivel-info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+  }
+
+  .bp-nivel-num {
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text3);
+  }
+
+  .bp-nivel-nombre {
+      font-family: var(--font-title);
+      font-size: 0.95rem;
+      color: var(--gold-l);
+  }
+
+  .bp-nivel-xp-req {
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      color: var(--text2);
+      white-space: nowrap;
+  }
+
+  .bp-barra-track {
+      height: 6px;
+      background: var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+  }
+
+  .bp-barra-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-l));
+      border-radius: 10px;
+      transition: width 0.4s ease;
+  }
+
+  .bp-nivel-progreso-txt {
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      color: var(--text3);
+      text-align: right;
+  }
+
+  .bp-premios-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+  }
+
+  .bp-premio {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+  }
+
+  .bp-premio-emoji { font-size: 1rem; }
+
+  .bp-premio-nombre {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--text);
+      flex: 1;
+  }
+
+  .bp-premio-costo {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      color: var(--gold);
+      white-space: nowrap;
+  }
   
+  #bp-niveles-container {                                                                                                                                                                                       display: flex;                                                                                                                                                                                      
+      display: flex;                                                                                                                                                                                      
+      flex-direction: column;                                                                                                                                                                             
+      gap: 18px; 
+  }
+
+.bp-btn-canjear {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(201, 148, 58, 0.1);
+      border: 1px solid rgba(201, 148, 58, 0.3);
+      padding: 4px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+  }
+
+  .bp-btn-canjear:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+  }
+
+  .bp-premio-canjeado {
+      font-size: 1rem;
+  }
+
+  #bp-puntos-total {                                                                                                                                                                                            font-family: var(--font-title);                                                                                                                                                                     
+      font-size: 1.6rem;                                                                                                                                                                                  
+      color: var(--gold-l);
+  }
+
+  .bp-total-fila {
+      display: flex;
+      gap: 16px;
+  }
+
+  .bp-total-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+  }
