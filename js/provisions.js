@@ -1,7 +1,11 @@
 let categoriasAbiertas = new Set();
 
 function cargarProvisiones() {
-    return Storage.load('provisiones') || {
+    const datos = Storage.load('provisiones');
+    if (datos && datos.categorias && datos.categorias.length > 0) {
+        return datos;
+    }
+    return {
         categorias: [...PROVISIONES_DEFAULT.categorias],
         items: [...PROVISIONES_DEFAULT.items]
     };
