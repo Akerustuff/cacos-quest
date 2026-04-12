@@ -13,15 +13,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Los datos están en dos documentos separados
-const docState      = db.collection('questlog').doc('state');
-const docProvisiones = db.collection('questlog').doc('provisiones');
+const docEstado      = db.collection('cacos-quest').doc('estado');
+const docProvisiones = db.collection('cacos-quest').doc('provisiones');
 
-// Evita que el onSnapshot reactive nuestras propias escrituras
 let _actualizandoDesdeFirebase = false;
 
 // ── Interceptar Storage.save ───────────────────────────────────────────────
-// 'provisiones' va a questlog/provisiones, todo lo demás a questlog/state
 const _guardarOriginal = Storage.save.bind(Storage);
 Storage.save = function(key, value) {
   _guardarOriginal(key, value);
@@ -31,41 +28,15 @@ Storage.save = function(key, value) {
     docProvisiones.set(value, { merge: true })
       .catch(err => console.warn('[Firebase] Error al guardar provisiones:', err));
   } else {
-    docState.set({ [key]: value }, { merge: true })
+    docEstado.set({ [key]: value }, { merge: true })
       .catch(err => console.warn('[Firebase] Error al guardar "' + key + '":', err));
   }
 };
 
-// ── Convertir datos del formato viejo al nuevo ────────────────────────────
-// El app viejo usaba: name, cat, qty
-// El app nuevo usa:   nombre, categoria, cantidad
-function convertirProvisiones(datos) {
-  const categorias = (datos.categorias || []).map(function(cat) {
-    return {
-      id:     cat.id,
-      nombre: cat.nombre || cat.name || '',
-      icono:  cat.icono  || '📦'
-    };
-  });
-
-  const items = (datos.items || []).map(function(item) {
-    return {
-      id:        item.id,
-      categoria: item.categoria || item.cat  || '',
-      nombre:    item.nombre    || item.name || '',
-      hay:       item.hay       || false,
-      cantidad:  item.cantidad  !== undefined ? item.cantidad : (item.qty || 0)
-    };
-  });
-
-  return { categorias, items };
-}
-
 // ── Escuchar cambios en tiempo real ────────────────────────────────────────
 function configurarListenerFirebase() {
 
-  // Listener de estado (puntos, misiones, ciclos, battle pass)
-  docState.onSnapshot(function(snapshot) {
+  docEstado.onSnapshot(function(snapshot) {
     if (!snapshot.exists) return;
     const datos = snapshot.data();
 
@@ -85,19 +56,16 @@ function configurarListenerFirebase() {
     if (huboCambios) refrescarPantallaActual();
 
   }, function(err) {
-    console.warn('[Firebase] Error en listener state:', err);
+    console.warn('[Firebase] Error en listener estado:', err);
   });
 
-  // Listener de provisiones
   docProvisiones.onSnapshot(function(snapshot) {
     if (!snapshot.exists) return;
-
     const datos = snapshot.data();
-    const provisiones = convertirProvisiones(datos);
 
     _actualizandoDesdeFirebase = true;
     const valorLocal  = localStorage.getItem('provisiones');
-    const valorRemoto = JSON.stringify(provisiones);
+    const valorRemoto = JSON.stringify(datos);
     const huboCambios = valorLocal !== valorRemoto;
 
     if (huboCambios) {
@@ -126,15 +94,15 @@ function refrescarPantallaActual() {
   }
 }
 
-// ── Primera vez: subir datos locales si Firestore está vacío ──────────────
+// ── Subir datos locales si Firestore está vacío ───────────────────────────
 async function inicializarFirebase() {
   try {
-    const [snapState, snapProvisiones] = await Promise.all([
-      docState.get(),
+    const [snapEstado, snapProvisiones] = await Promise.all([
+      docEstado.get(),
       docProvisiones.get()
     ]);
 
-    if (!snapState.exists) {
+    if (!snapEstado.exists) {
       const datosLocales = {};
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -144,14 +112,14 @@ async function inicializarFirebase() {
         }
       }
       if (Object.keys(datosLocales).length > 0) {
-        await docState.set(datosLocales);
+        await docEstado.set(datosLocales);
       }
     }
 
     if (!snapProvisiones.exists) {
       const provisiones = Storage.load('provisiones');
       if (provisiones) {
-        await docProvisiones.set(convertirProvisiones(provisiones));
+        await docProvisiones.set(provisiones);
       }
     }
   } catch (err) {
