@@ -62,6 +62,7 @@ function configurarListenerFirebase() {
   docProvisiones.onSnapshot(function(snapshot) {
     if (!snapshot.exists) return;
     const datos = snapshot.data();
+    if (!datos.categorias || datos.categorias.length === 0) return;
 
     _actualizandoDesdeFirebase = true;
     const valorLocal  = localStorage.getItem('provisiones');
