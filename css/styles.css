@@ -1201,8 +1201,16 @@ body {
   .bp-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 8px;
+      padding: 1rem;
+  }
+
+  .bp-header-centro {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
   }
 
   .bp-nivel-badge {
