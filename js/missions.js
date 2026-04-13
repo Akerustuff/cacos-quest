@@ -242,29 +242,37 @@ function renderizarMisiones() {
       const total = subtareaCards.length;
       const hechas = grupoCard.querySelectorAll('.subtarea-card.done').length;
 
-      grupoCard.querySelector('.grupo-progreso').textContent = `${hechas}/${total}`;
-
+      const eraCompleto = grupoCard.classList.contains('grupo-completo');
       const completo = hechas === total;
+
+      grupoCard.querySelector('.grupo-progreso').textContent = `${hechas}/${total}`;
       grupoCard.classList.toggle('grupo-completo', completo);
       grupoCard.querySelector('.grupo-buff').classList.toggle('buff-earned', completo);
 
-      if (completo) {
-        const jugadoresParticipantes = new Set();
-        subtareaCards.forEach(function(card) {
-            const jugador = estado[card.dataset.id];
-            if (jugador) jugadoresParticipantes.add(jugador);
-        });
+      const puntosBuff = parseInt(grupoCard.dataset.puntosBuff);
 
-        const buff = grupoCard.dataset.buff;
-        const puntosBuff = parseInt(grupoCard.dataset.puntosBuff);
+      const jugadoresParticipantes = new Set();
+      subtareaCards.forEach(function(card) {
+          const jugador = estado[card.dataset.id];
+          if (jugador) jugadoresParticipantes.add(jugador);
+      });
 
-        if (jugadoresParticipantes.size > 1) {
-            sumarPuntosAmbosJugadores(puntosBuff);
-        } else {
-            const jugador = [...jugadoresParticipantes][0] || Players.current;
-            sumarPuntosJugador(jugador, puntosBuff);
-        }
-        mostrarModalBuff(buff, puntosBuff);
+      if (!eraCompleto && completo) {
+          const buff = grupoCard.dataset.buff;
+          if (jugadoresParticipantes.size > 1) {
+              sumarPuntosAmbosJugadores(puntosBuff);
+          } else {
+              const jugador = [...jugadoresParticipantes][0] || Players.current;
+              sumarPuntosJugador(jugador, puntosBuff);
+          }
+          mostrarModalBuff(buff, puntosBuff);
+      } else if (eraCompleto && !completo) {
+          if (jugadoresParticipantes.size > 1) {
+              sumarPuntosAmbosJugadores(-puntosBuff);
+          } else {
+              const jugador = [...jugadoresParticipantes][0] || Players.current;
+              sumarPuntosJugador(jugador, -puntosBuff);
+          }
       }
   }
 
@@ -295,7 +303,7 @@ function renderizarMisiones() {
 
   function actualizarDisplayPuntos() {
     const display = document.getElementById('puntos-display');
-    display.textContent = '⭐' + obtenerPuntos() + ' Nenurios';
+    display.textContent = '⭐' + obtenerPuntos() + ' Experiencia';
   }
 
   function mostrarModalBuff(buff, puntos) {

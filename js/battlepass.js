@@ -56,7 +56,7 @@ function renderizarBattlepass() {
                   <div class="bp-premio">
                       <span class="bp-premio-emoji">${p.emoji}</span>
                       <span class="bp-premio-nombre">${p.nombre}</span>
-                      ${yaCanjeado ? '' : `<span class="bp-premio-costo">⭐ ${p.costo}</span>`}
+                      ${yaCanjeado ? '' : `<span class="bp-premio-costo">💰 ${p.costo}</span>`}
                       ${boton}
                   </div>
               `;
@@ -105,7 +105,7 @@ function canjearPremio(nivelNum, premioIndex, costo, nombre) {
       _premioPendienteCosto = costo;
 
       document.getElementById('modal-canjear-texto').textContent =
-          '¿Quieres canjear "' + nombre + '" por ⭐ ' + costo + ' Nenurios?';
+          '¿Quieres canjear "' + nombre + '" por 💰 ' + costo + ' Nenurios?';
       document.getElementById('modal-canjear').classList.remove('hidden');
   }
 
