@@ -1,6 +1,6 @@
 // sw.js — Service Worker de Cacos Quest
 
-const NOMBRE_CACHE = 'cacos-quest-v1.5';
+const NOMBRE_CACHE = 'cacos-quest-v1.6';
 
 const ARCHIVOS_A_CACHEAR = [
   './',
@@ -19,16 +19,17 @@ const ARCHIVOS_A_CACHEAR = [
   './manifest.json'
 ];
 
-// Al instalar: guardar todos los archivos en caché
+// Al instalar: guardar todos los archivos en caché y activar de inmediato
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(NOMBRE_CACHE).then(function(cache) {
       return cache.addAll(ARCHIVOS_A_CACHEAR);
     })
   );
+  self.skipWaiting();
 });
 
-// Al activar: borrar cachés viejas si el nombre cambió
+// Al activar: borrar cachés viejas y tomar control de inmediato
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(nombres) {
@@ -39,6 +40,7 @@ self.addEventListener('activate', function(event) {
       );
     })
   );
+  self.clients.claim();
 });
 
 // Al pedir recursos: responder con caché si existe, si no ir a la red
