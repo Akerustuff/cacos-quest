@@ -17,7 +17,7 @@
   <!-- PANTALLA: Login -->
   <div id="screen-login" class="screen hidden">
     <div class="login-titulo">Cacos Quest</div>
-    <div class="login-version">v1.4</div>
+    <div class="login-version">v1.5</div>
     <div class="login-subtitulo">Inicia sesión para continuar</div>
     <button class="login-btn-google" onclick="loginConGoogle()">
       <span>🔑</span> Entrar con Google
@@ -46,7 +46,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v1.4</span>
+        <span class="menu-logo-version">v1.5</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" id="player-name" onclick="toggleMenuJugador()"></button>
@@ -70,7 +70,7 @@
     <div class="missions-header">
       <button class="back-btn" onclick="navigate('menu')">‹</button>
       <h2 class="screen-title">Misiones</h2>
-      <span id="puntos-display">⭐ 0 Nenurios</span>
+      <span id="puntos-display">💰 0 Nenurios</span>
     </div>
     <div class="missions-tabs">
       <button class="tab-btn active" onclick="cambiarTab('diarias')">Diarias</button>
@@ -145,10 +145,10 @@
         <span id="ciclo-periodo" class="ciclo-actual-fecha">Periodo: —</span>
       </div>
       <div class="ciclo-actual-stats">
-        <span id="ciclo-puntos-mono">🐵 0 Nenurios</span>
-        <span id="ciclo-puntos-oso">🐻 0 Nenurios</span>
-        <span id="ciclo-puntos">0 ⭐Nenurios Totales</span>
-        <span id="ciclo-nivel">Nivel 0</span>
+        <span id="ciclo-puntos-mono" class="ciclo-puntos-total"><span id="ciclo-puntos-mono-valor">🐵 0</span><span class="ciclo-puntos-label">Nenurios</span></span>
+        <span id="ciclo-puntos-oso" class="ciclo-puntos-total"><span id="ciclo-puntos-oso-valor">🐻 0</span><span class="ciclo-puntos-label">Nenurios</span></span>
+        <span id="ciclo-puntos" class="ciclo-puntos-total"><span id="ciclo-puntos-valor">💰 0</span><span class="ciclo-puntos-label">Nenurios Totales</span></span>
+        <span id="ciclo-nivel" class="ciclo-puntos-total"><span id="ciclo-nivel-valor">0</span><span class="ciclo-puntos-label">Nivel</span></span>
       </div>
       <button class="finalizar-ciclo-btn" onclick="confirmarFinalizarCiclo()">Finalizar Ciclo</button>
     </div>
@@ -186,7 +186,7 @@
         <span id="modal-buff-nombre"></span>
       </div>
       <div class="modal-buff-puntos">
-        <span id="modal-buff-puntos"></span> ⭐ Nenurios
+        <span id="modal-buff-puntos"></span> 💰 Nenurios
       </div>
       <button class="modal-btn-cerrar" onclick="cerrarModalBuff()">¡Genial!</button>
     </div>

@@ -740,6 +740,18 @@ body {
       color: var(--text3);
   }
 
+  .ciclo-puntos-total {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.2;
+  }
+
+  .ciclo-puntos-label {
+      font-size: 0.7rem;
+      color: var(--text3);
+  }
+
   .ciclo-actual-stats {
       display: flex;
       gap: 12px;

@@ -75,10 +75,10 @@ function renderizarCiclos() {
 
     document.getElementById('ciclo-numero').textContent = 'Ciclo' + ciclo.numero;
     document.getElementById('ciclo-periodo').textContent = 'Periodo: ' + formatearPeriodo(ciclo.inicio, ultimoDiaMes);
-    document.getElementById('ciclo-puntos-mono').textContent = '🐵 ' + puntosMono + ' Nenurios';
-    document.getElementById('ciclo-puntos-oso').textContent = '🐻 ' + puntosOso + ' Nenurios';
-    document.getElementById('ciclo-puntos').textContent = '⭐ ' + puntosConjuntos + ' Nenurios Totales';
-    document.getElementById('ciclo-nivel').textContent = 'Nivel ' + nivelActual;
+    document.getElementById('ciclo-puntos-mono-valor').textContent = '🐵 ' + puntosMono;
+    document.getElementById('ciclo-puntos-oso-valor').textContent = '🐻 ' + puntosOso;
+    document.getElementById('ciclo-puntos-valor').textContent = '💰 ' + puntosConjuntos;
+    document.getElementById('ciclo-nivel-valor').textContent = nivelActual;
     
     let html = '';
       if (registro.length === 0) {
@@ -94,7 +94,7 @@ function renderizarCiclos() {
                       <div class="ciclo-card-stats">
                           <span>🐵 ${c.puntosMono} Nenurios </span>
                           <span>🐻 ${c.puntosOso} Nenurios </span>
-                          <span>⭐ ${c.puntosConjuntos} Nenurios Totales </span>
+                          <span>💰 ${c.puntosConjuntos} Nenurios Totales </span>
                           <span>Nivel ${c.nivel}</span>
                       </div>
                   </div>
