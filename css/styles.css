@@ -335,11 +335,71 @@ body {
       margin: 0;
   }
 
+#screen-missions {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 20px 0;
+    overflow: hidden;
+}
+
+#screen-missions .menu-header {
+    margin-bottom: 4px;
+    flex-shrink: 0;
+}
+
+.missions-titulo-section {
+    text-align: center;
+    padding: 10px 0 8px;
+    flex-shrink: 0;
+}
+
+.missions-titulo {
+    font-family: var(--font-title);
+    font-size: 1.3rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+#puntos-display {
+    font-family: var(--font-ui);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text2);
+}
+
+.missions-acciones {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+}
+
+.btn-agregar-mision {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: background 0.2s;
+}
+
+.btn-agregar-mision:hover {
+    background: var(--gold-glow);
+}
+
   .missions-tabs {
       display: flex;
-      padding: 0 1rem;
+      padding: 0;
       gap: 0.5rem;
       margin-bottom: 1rem;
+      flex-shrink: 0;
   }
 
   .tab-btn {
@@ -364,7 +424,9 @@ body {
   }
 
   #missions-container {
-      padding: 0 1rem;
+      flex: 1;
+      min-height: 0;
+      padding: 0 1rem 80px;
       display: flex;
       flex-direction: column;
       gap: 8px;
