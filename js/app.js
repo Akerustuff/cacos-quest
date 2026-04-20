@@ -38,17 +38,22 @@
 
   function updatePlayerName() {
     const player = Players.get();
-    document.getElementById('player-name').textContent = player.emoji + ' ' + player.name;
+    document.querySelectorAll('.menu-jugador-btn').forEach(function(btn) {
+      btn.textContent = player.emoji + ' ' + player.name;
+    });
   }
 
   function toggleMenuJugador() {
-    document.getElementById('menu-jugador-dropdown').classList.toggle('visible');
+    const pantallaVisible = document.querySelector('.screen:not(.hidden)');
+    const dropdown = pantallaVisible ? pantallaVisible.querySelector('.menu-jugador-dropdown') : null;
+    if (dropdown) dropdown.classList.toggle('visible');
   }
 
   document.addEventListener('click', function(e) {
-    const wrap = document.querySelector('.menu-jugador-wrap');
-    if (wrap && !wrap.contains(e.target)) {
-      document.getElementById('menu-jugador-dropdown').classList.remove('visible');
+    if (!e.target.closest('.menu-jugador-wrap')) {
+      document.querySelectorAll('.menu-jugador-dropdown').forEach(function(d) {
+        d.classList.remove('visible');
+      });
     }
   });
 
