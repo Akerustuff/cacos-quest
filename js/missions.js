@@ -69,19 +69,23 @@ function cambiarTab(tab) {
 
 }
 
-function buildMisionCard(mision, key, estado) {
+function buildMisionCard(mision, key, estado, esCustom = false) {
     const done = estado[mision.id] ? 'done' : '';
     const checkmark = estado[mision.id] ? '✓' : '';
+    const botonBorrar = esCustom
+        ? `<button class="btn-borrar-mision" onclick="borrarMisionCustom('${mision.id}')">🗑</button>`
+        : '';
     return `
         <div class="mission-card ${done}" data-id=${mision.id} data-key="${key}" data-puntos="${mision.puntos}" data-compartida="${mision.compartida || false}">
             <div class="mission-info">
-    <span class="mission-nombre">${mision.nombre}</span>
-                  <span class="mission-desc">${mision.desc}</span>
-              </div>
-              <div class="mission-puntos">+${mision.puntos}</div>
-              <div class="mission-check" onclick="completarMision(this)">${checkmark}</div>
-          </div>
-      `;
+                <span class="mission-nombre">${mision.nombre}</span>
+                <span class="mission-desc">${mision.desc}</span>
+            </div>
+            <div class="mission-puntos">+${mision.puntos}</div>
+            ${botonBorrar}
+            <div class="mission-check" onclick="completarMision(this)">${checkmark}</div>
+        </div>
+    `;
 }
 
 function buildGrupoCard(grupo, key, estado) {
@@ -129,6 +133,7 @@ function buildGrupoCard(grupo, key, estado) {
 
 function renderizarMisiones() {
     const contenedor = document.getElementById('missions-container');
+    const misionesCustom = cargarMisionesCustom();
     let html = '';
 
     if (tabActual === 'diarias') {
@@ -136,16 +141,23 @@ function renderizarMisiones() {
         const keyHogar = getKeyDiarias();
         const estadoPersonales = cargarEstado(keyPersonales);
         const estadoHogar = cargarEstado(keyHogar);
+        const jugador = Players.current;
 
         html += '<h3>Personales</h3>';
         MISIONES_DIARIAS_PERSONALES.forEach(mision => {
             html += buildMisionCard(mision, keyPersonales, estadoPersonales);
         });
+        misionesCustom
+            .filter(m => m.tipo === 'diaria_personal' && (m.jugador === null || m.jugador === jugador))
+            .forEach(m => { html += buildMisionCard(m, keyPersonales, estadoPersonales, true); });
 
         html += '<h3>Hogar</h3>';
         MISIONES_DIARIAS_HOGAR.forEach(mision => {
             html += buildMisionCard(mision, keyHogar, estadoHogar);
         });
+        misionesCustom
+            .filter(m => m.tipo === 'diaria_hogar' && (m.jugador === null || m.jugador === jugador))
+            .forEach(m => { html += buildMisionCard(m, keyHogar, estadoHogar, true); });
     }
 
     if (tabActual === 'semanales') {
@@ -164,6 +176,9 @@ function renderizarMisiones() {
             .forEach(mision => {
                 html += buildMisionCard(mision, key, estado);
             });
+        misionesCustom
+            .filter(m => m.tipo === 'semanal_suelta' && (m.jugador === null || m.jugador === jugador))
+            .forEach(m => { html += buildMisionCard(m, key, estado, true); });
     }
 
     if (tabActual === 'mensuales') {
@@ -179,6 +194,9 @@ function renderizarMisiones() {
             .forEach(mision => {
                 html += buildMisionCard(mision, keyHogar, estadoHogar);
             });
+        misionesCustom
+            .filter(m => m.tipo === 'mensual_hogar' && (m.jugador === null || m.jugador === jugador))
+            .forEach(m => { html += buildMisionCard(m, keyHogar, estadoHogar, true); });
 
         html += '<h3>Personales</h3>';
         MISIONES_MENSUALES
@@ -186,6 +204,9 @@ function renderizarMisiones() {
             .forEach(mision => {
                 html += buildMisionCard(mision, keyPersonales, estadoPersonales);
             });
+        misionesCustom
+            .filter(m => m.tipo === 'mensual_personal' && (m.jugador === null || m.jugador === jugador))
+            .forEach(m => { html += buildMisionCard(m, keyPersonales, estadoPersonales, true); });
 
         html += '<button class="btn-reset-misiones" onclick="confirmarResetMisiones()">↺ Reiniciar misiones y puntos</button>';
     }
@@ -361,6 +382,61 @@ function renderizarMisiones() {
     renderizarMisiones();
   }
   
+  // ── Misiones Custom ─────────────────────────────────────────────────────────
+
+  function cargarMisionesCustom() {
+    return Storage.load('misiones_custom') || [];
+  }
+
+  function guardarMisionesCustom(lista) {
+    Storage.save('misiones_custom', lista);
+  }
+
+  function abrirModalAgregarMision() {
+    document.getElementById('mision-select-jugador').value = '';
+    document.getElementById('mision-input-nombre').value = '';
+    document.getElementById('mision-input-desc').value = '';
+    document.getElementById('mision-input-puntos').value = '';
+    document.getElementById('modal-agregar-mision').classList.add('visible');
+  }
+
+  function cerrarModalAgregarMision() {
+    document.getElementById('modal-agregar-mision').classList.remove('visible');
+  }
+
+  function confirmarAgregarMision() {
+    const tipo    = document.getElementById('mision-select-tipo').value;
+    const jugador = document.getElementById('mision-select-jugador').value || null;
+    const nombre  = document.getElementById('mision-input-nombre').value.trim();
+    const desc    = document.getElementById('mision-input-desc').value.trim();
+    const puntos  = parseInt(document.getElementById('mision-input-puntos').value);
+
+    if (!nombre || !desc || !puntos || puntos < 1) return;
+
+    const nueva = {
+      id:         'custom_' + Date.now(),
+      nombre,
+      desc,
+      puntos,
+      tipo,
+      jugador,
+      compartida: jugador === null,
+      esCustom:   true
+    };
+
+    const lista = cargarMisionesCustom();
+    lista.push(nueva);
+    guardarMisionesCustom(lista);
+    cerrarModalAgregarMision();
+    renderizarMisiones();
+  }
+
+  function borrarMisionCustom(id) {
+    const lista = cargarMisionesCustom().filter(function(m) { return m.id !== id; });
+    guardarMisionesCustom(lista);
+    renderizarMisiones();
+  }
+
    let toastTimer = null;
 
   function mostrarToastXP(puntos) {

@@ -17,7 +17,7 @@
   <!-- PANTALLA: Login -->
   <div id="screen-login" class="screen hidden">
     <div class="login-titulo">Cacos Quest</div>
-    <div class="login-version">v2.2</div>
+    <div class="login-version">v2.3</div>
     <div class="login-subtitulo">Inicia sesión para continuar</div>
     <button class="login-btn-google" onclick="loginConGoogle()">
       <span>🔑</span> Entrar con Google
@@ -46,7 +46,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v2.2</span>
+        <span class="menu-logo-version">v2.3</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -72,7 +72,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v2.2</span>
+        <span class="menu-logo-version">v2.3</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -261,6 +261,47 @@
       <div class="modal-btns">
         <button class="modal-btn-secundario" onclick="cerrarModalFinalizarCiclo()">Cancelar</button>
         <button class="modal-btn-primario" onclick="confirmarYFinalizar()">Finalizar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Agregar misión -->
+  <div class="prov-modal-fondo" id="modal-agregar-mision">
+    <div class="prov-modal">
+      <div class="prov-modal-titulo">Nueva Misión</div>
+      <div class="prov-campo">
+        <label>Tipo</label>
+        <select id="mision-select-tipo">
+          <option value="diaria_personal">Diaria — Personal</option>
+          <option value="diaria_hogar">Diaria — Hogar</option>
+          <option value="semanal_suelta">Semanal — Suelta</option>
+          <option value="mensual_hogar">Mensual — Hogar</option>
+          <option value="mensual_personal">Mensual — Personal</option>
+        </select>
+      </div>
+      <div class="prov-campo">
+        <label>Jugador asignado</label>
+        <select id="mision-select-jugador">
+          <option value="">Compartida</option>
+          <option value="mono">🐵 Mono</option>
+          <option value="oso">🐻 Oso</option>
+        </select>
+      </div>
+      <div class="prov-campo">
+        <label>Nombre</label>
+        <input type="text" id="mision-input-nombre" placeholder="Nombre de la misión...">
+      </div>
+      <div class="prov-campo">
+        <label>Descripción</label>
+        <input type="text" id="mision-input-desc" placeholder="¿Qué hay que hacer?">
+      </div>
+      <div class="prov-campo">
+        <label>Puntos</label>
+        <input type="number" id="mision-input-puntos" placeholder="10" min="1">
+      </div>
+      <div class="prov-modal-botones">
+        <button class="prov-modal-btn cancelar" onclick="cerrarModalAgregarMision()">Cancelar</button>
+        <button class="prov-modal-btn confirmar" onclick="confirmarAgregarMision()">Agregar</button>
       </div>
     </div>
   </div>

@@ -533,6 +533,26 @@ body {
       color: #000;
   }
 
+  .btn-borrar-mision {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      border-radius: 6px;
+      border: 1px solid rgba(160, 40, 40, 0.4);
+      background: transparent;
+      color: #c96060;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.18s;
+  }
+
+  .btn-borrar-mision:hover {
+      background: rgba(160, 40, 40, 0.15);
+  }
+
   .btn-reset-misiones {
       display: block;
       width: 100%;
