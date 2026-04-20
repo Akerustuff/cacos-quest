@@ -336,21 +336,26 @@ body {
   }
 
 #screen-missions {
-    display: flex;
-    flex-direction: column;
-    padding: 20px 20px 0;
-    overflow: hidden;
+    overflow-y: auto;
+    padding: 0;
 }
 
 #screen-missions .menu-header {
+    padding: 20px 20px 0;
     margin-bottom: 4px;
-    flex-shrink: 0;
 }
 
 .missions-titulo-section {
     text-align: center;
-    padding: 10px 0 8px;
+    padding: 10px 20px 8px;
     flex-shrink: 0;
+}
+
+.missions-titulo-fila {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    position: relative;
 }
 
 .missions-titulo {
@@ -358,7 +363,11 @@ body {
     font-size: 1.3rem;
     color: var(--gold);
     letter-spacing: 2px;
-    margin-bottom: 8px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    pointer-events: none;
 }
 
 #puntos-display {
@@ -371,9 +380,9 @@ body {
 .missions-acciones {
     display: flex;
     justify-content: flex-end;
+    padding: 0 20px;
     margin-top: 10px;
     margin-bottom: 14px;
-    flex-shrink: 0;
 }
 
 .btn-agregar-mision {
@@ -396,7 +405,7 @@ body {
 
   .missions-tabs {
       display: flex;
-      padding: 0;
+      padding: 0 20px;
       gap: 0.5rem;
       margin-bottom: 1rem;
       flex-shrink: 0;
@@ -424,13 +433,10 @@ body {
   }
 
   #missions-container {
-      flex: 1;
-      min-height: 0;
-      padding: 0 1rem 80px;
+      padding: 0 20px 80px;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      overflow-y: auto;
   }
 
   #missions-container h3 {
