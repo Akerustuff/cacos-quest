@@ -414,3 +414,135 @@ function eliminarGasto(gastoId) {
   guardarGastosMes(mes, gastos);
   renderizarPresupuesto();
 }
+
+// ── Presupuestos Históricos ────────────────────────────────────
+
+let histCategoriasAbiertas = new Set();
+let histSubcategoriasAbiertas = new Set();
+
+function toggleHistCategoria(key) {
+  if (histCategoriasAbiertas.has(key)) histCategoriasAbiertas.delete(key);
+  else histCategoriasAbiertas.add(key);
+  renderizarPresupuestosHistoricos();
+}
+
+function toggleHistSubcategoria(key) {
+  if (histSubcategoriasAbiertas.has(key)) histSubcategoriasAbiertas.delete(key);
+  else histSubcategoriasAbiertas.add(key);
+  renderizarPresupuestosHistoricos();
+}
+
+function renderizarPresupuestosHistoricos() {
+  const mesActual = obtenerMesActual();
+  const anio = new Date().getFullYear();
+  const categorias = cargarCategoriasPres();
+  const subcategorias = cargarSubcategoriasPres();
+
+  const mesesConDatos = [];
+  for (let m = 1; m <= 12; m++) {
+    const clave = `${anio}-${String(m).padStart(2, '0')}`;
+    if (clave === mesActual) continue;
+    const gastos = cargarGastosMes(clave);
+    if (gastos.length > 0) mesesConDatos.push(clave);
+  }
+
+  const body = document.getElementById('presupuestos-historicos-body');
+
+  if (mesesConDatos.length === 0) {
+    body.innerHTML = '<p style="text-align:center; color:var(--text2); padding:2rem;">No hay meses anteriores con registros.</p>';
+    return;
+  }
+
+  const nombresMeses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  body.innerHTML = mesesConDatos.map(mes => {
+    const gastos = cargarGastosMes(mes);
+    const totalGastado = gastos.reduce((suma, g) => suma + g.monto, 0);
+    const totalPresupuestado = subcategorias.reduce((suma, s) => suma + (s.presupuesto || 0), 0);
+    const [anioMes, numMes] = mes.split('-');
+    const nombreMes = nombresMeses[parseInt(numMes) - 1];
+
+    const filasCategorias = categorias.map(cat => {
+      const gastosCat = gastos.filter(g => g.categoriaId === cat.id);
+      if (gastosCat.length === 0) return '';
+
+      const subcatsCat = subcategorias.filter(s => s.categoriaId === cat.id);
+      const gastadoCat = gastosCat.reduce((suma, g) => suma + g.monto, 0);
+      const presupuestoCat = subcatsCat.reduce((suma, s) => suma + (s.presupuesto || 0), 0);
+      const porcentajeCat = presupuestoCat > 0 ? Math.min(100, (gastadoCat / presupuestoCat) * 100) : 0;
+      const esPeligroCat = gastadoCat > presupuestoCat;
+      const catKey = `${mes}_${cat.id}`;
+      const catAbierta = histCategoriasAbiertas.has(catKey);
+
+      const filasSubcats = subcatsCat.map(subcat => {
+        const gastosSubcat = gastosCat.filter(g => g.subcategoriaId === subcat.id);
+        if (gastosSubcat.length === 0) return '';
+
+        const gastadoSubcat = gastosSubcat.reduce((suma, g) => suma + g.monto, 0);
+        const porcentajeSubcat = subcat.presupuesto > 0 ? Math.min(100, (gastadoSubcat / subcat.presupuesto) * 100) : 0;
+        const esPeligroSubcat = gastadoSubcat > subcat.presupuesto;
+        const subcatKey = `${mes}_${subcat.id}`;
+        const subcatAbierta = histSubcategoriasAbiertas.has(subcatKey);
+
+        return `
+          <div class="pres-subcat-seccion${subcatAbierta ? ' abierta' : ''}">
+            <div class="pres-subcat-header" onclick="toggleHistSubcategoria('${subcatKey}')">
+              <span class="pres-subcat-nombre">${subcat.icono ? subcat.icono + ' ' : ''}${subcat.nombre}</span>
+              <span class="pres-subcat-montos">${formatearPesos(gastadoSubcat)} / ${formatearPesos(subcat.presupuesto)}</span>
+              <span class="pres-subcat-flecha">▾</span>
+            </div>
+            <div class="pres-barra-wrap">
+              <div class="pres-barra-fondo">
+                <div class="pres-barra-relleno${esPeligroSubcat ? ' peligro' : ''}" style="width:${porcentajeSubcat}%"></div>
+              </div>
+            </div>
+            <div class="pres-subcat-gastos${subcatAbierta ? ' abierta' : ''}">
+              ${gastosSubcat.map(g => `
+                <div class="pres-gasto-item">
+                  <span class="pres-gasto-jugador">${Players.list[g.jugador]?.emoji || '👤'}</span>
+                  <div class="pres-gasto-info">
+                    <span class="pres-gasto-titulo">${g.titulo}</span>
+                  </div>
+                  <span class="pres-gasto-monto">${formatearPesos(g.monto)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="pres-categoria${catAbierta ? ' abierta' : ''}">
+          <div class="pres-categoria-header" onclick="toggleHistCategoria('${catKey}')">
+            <span class="pres-categoria-icono">${cat.icono || '📦'}</span>
+            <div class="pres-categoria-info">
+              <div class="pres-categoria-nombre">${cat.nombre}</div>
+              <div class="pres-categoria-montos">queda ${formatearPesos(Math.max(0, presupuestoCat - gastadoCat))} de ${formatearPesos(presupuestoCat)}</div>
+            </div>
+            <span class="pres-categoria-flecha">▾</span>
+          </div>
+          <div class="pres-barra-wrap">
+            <div class="pres-barra-fondo">
+              <div class="pres-barra-relleno${esPeligroCat ? ' peligro' : ''}" style="width:${porcentajeCat}%"></div>
+            </div>
+          </div>
+          <div class="pres-gastos-lista">
+            ${filasSubcats}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="hist-mes">
+        <div class="hist-mes-header">
+          <span class="hist-mes-nombre">${nombreMes} ${anioMes}</span>
+          <span class="hist-mes-total">quedan ${formatearPesos(Math.max(0, totalPresupuestado - totalGastado))} de ${formatearPesos(totalPresupuestado)}</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.5rem; padding:0.75rem;">
+          ${filasCategorias}
+        </div>
+      </div>
+    `;
+  }).join('');
+}

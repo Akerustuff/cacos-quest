@@ -208,7 +208,6 @@ function renderizarMisiones() {
             .filter(m => m.tipo === 'mensual_personal' && (m.jugador === null || m.jugador === jugador))
             .forEach(m => { html += buildMisionCard(m, keyPersonales, estadoPersonales, true); });
 
-        html += '<button class="btn-reset-misiones" onclick="confirmarResetMisiones()">↺ Reiniciar misiones y puntos</button>';
     }
 
     contenedor.innerHTML = html;

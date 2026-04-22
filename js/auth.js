@@ -18,17 +18,15 @@ function cerrarSesion() {
 // Escuchar cambios de estado de autenticación
 auth.onAuthStateChanged(function(usuario) {
   if (usuario) {
-    // Usuario autenticado: inicializar Firestore y navegar
     inicializarFirebase();
     const hasSession = Players.loadSession();
     if (hasSession) {
       updatePlayerName();
-      navigate('menu');
+      navigate('missions');
     } else {
       navigate('player');
     }
   } else {
-    // No autenticado: mostrar pantalla de login
     navigate('login');
   }
 });
