@@ -210,6 +210,7 @@ function renderizarMisiones() {
 
     }
 
+    html += '<p class="misiones-footer">Hecho por el 🐻 con amor ♥️</p>';
     contenedor.innerHTML = html;
 
     gruposAbiertos.forEach(function(grupoId) {
