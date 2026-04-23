@@ -540,10 +540,19 @@ body {
   }
 
   #missions-container {
-      padding: 0 20px 80px;
+      padding: 0 20px 100px;
       display: flex;
       flex-direction: column;
       gap: 8px;
+  }
+
+  .misiones-footer {
+      text-align: center;
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      color: var(--text3);
+      margin-top: 20px;
+      opacity: 0.6;
   }
 
   #missions-container h3 {
