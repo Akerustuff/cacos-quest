@@ -176,6 +176,13 @@ function renderizarProvisiones() {
 
       itemEditandoId = itemId;
       document.getElementById('prov-input-editar').value = item.nombre;
+
+      const select = document.getElementById('prov-select-editar-categoria');
+      select.innerHTML = datos.categorias.map(cat =>
+          `<option value="${cat.id}">${cat.icono || '📦'} ${cat.nombre}</option>`
+      ).join('');
+      select.value = item.categoria;
+
       document.getElementById('prov-editar-botones').style.display = 'flex';
       document.getElementById('prov-confirmar-eliminar-botones').style.display = 'none';
       document.getElementById('prov-modal-editar').classList.add('visible');
@@ -193,6 +200,7 @@ function renderizarProvisiones() {
       const datos = cargarProvisiones();
       const item = datos.items.find(i => i.id === itemEditandoId);
       item.nombre = nombreNuevo;
+      item.categoria = document.getElementById('prov-select-editar-categoria').value;
 
       guardarProvisiones(datos);
       cerrarModalEditar();

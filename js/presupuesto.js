@@ -1,5 +1,7 @@
 let categoriasPresAbiertas = new Set();
 let subcategoriasPresAbiertas = new Set();
+let modoEdicionPresActivo = false;
+let modificarValoresCategoriasAbiertas = new Set();
 
 function migrarPresupuesto() {
   let subcats = Storage.load('presupuesto_subcategorias');
@@ -130,7 +132,10 @@ function renderizarPresupuesto() {
           <div class="pres-subcat-header" onclick="toggleSubcategoriaPres('${subcat.id}')">
             <span class="pres-subcat-nombre">${subcat.icono ? subcat.icono + ' ' : ''}${subcat.nombre}</span>
             <span class="pres-subcat-montos">${formatearPesos(gastadoSubcat)} / ${formatearPesos(subcat.presupuesto)}</span>
-            <button class="prov-btn-accion editar" onclick="event.stopPropagation(); abrirModalEditarSubcategoriaPres('${subcat.id}')">✏</button>
+            ${modoEdicionPresActivo
+              ? `<button class="prov-btn-accion editar" onclick="event.stopPropagation(); abrirModalEditarSubcategoriaPres('${subcat.id}')">✏</button>`
+              : `<button class="prov-btn-accion editar" onclick="event.stopPropagation(); abrirModalAgregarGasto('${cat.id}', '${subcat.id}')">＋</button>`
+            }
             <span class="pres-subcat-flecha">▾</span>
           </div>
           <div class="pres-barra-wrap">
@@ -192,7 +197,7 @@ function renderizarPresupuesto() {
             <div class="pres-categoria-nombre">${cat.nombre}</div>
             <div class="pres-categoria-montos">queda ${formatearPesos(Math.max(0, presupuestoCat - gastadoCat))} de ${formatearPesos(presupuestoCat)}</div>
           </div>
-          <button class="prov-btn-accion editar" onclick="event.stopPropagation(); abrirModalEditarCategoriaPres('${cat.id}')">✏</button>
+          ${modoEdicionPresActivo ? `<button class="prov-btn-accion editar" onclick="event.stopPropagation(); abrirModalEditarCategoriaPres('${cat.id}')">✏</button>` : ''}
           <span class="pres-categoria-flecha">▾</span>
         </div>
         <div class="pres-barra-wrap">
@@ -417,14 +422,16 @@ function confirmarEliminarSubcategoriaPres() {
 
 // ── Agregar gasto ──────────────────────────────────────────────
 
-function abrirModalAgregarGasto() {
+function abrirModalAgregarGasto(catIdPredefinido, subcatIdPredefinido) {
   cerrarFabMenuPres();
   const categorias = cargarCategoriasPres();
   const select = document.getElementById('pres-gasto-select-categoria');
   select.innerHTML = categorias.map(cat =>
     `<option value="${cat.id}">${cat.icono || '📦'} ${cat.nombre}</option>`
   ).join('');
+  if (catIdPredefinido) select.value = catIdPredefinido;
   actualizarSubcategoriasGasto();
+  if (subcatIdPredefinido) document.getElementById('pres-gasto-select-subcategoria').value = subcatIdPredefinido;
   document.getElementById('pres-gasto-input-titulo').value = '';
   document.getElementById('pres-gasto-input-monto').value = '';
   document.getElementById('modal-agregar-gasto').classList.add('visible');
@@ -777,4 +784,91 @@ function renderizarPresupuestosHistoricos() {
       </div>
     `;
   }).join('');
+}
+
+// ── Menú opciones presupuesto ──────────────────────────────────
+
+function toggleMenuOpcionesPres() {
+  document.getElementById('pres-opciones-dropdown').classList.toggle('visible');
+  document.getElementById('pres-opciones-btn').classList.toggle('activo');
+}
+
+function cerrarMenuOpcionesPres() {
+  document.getElementById('pres-opciones-dropdown').classList.remove('visible');
+  document.getElementById('pres-opciones-btn').classList.toggle('activo', modoEdicionPresActivo);
+}
+
+function toggleModoEdicionPres() {
+  modoEdicionPresActivo = !modoEdicionPresActivo;
+  const itemEditar = document.getElementById('pres-opciones-item-editar');
+  if (itemEditar) {
+    itemEditar.textContent = modoEdicionPresActivo ? '✏ Editar ✓' : '✏ Editar';
+    itemEditar.classList.toggle('activo', modoEdicionPresActivo);
+  }
+  document.getElementById('pres-opciones-btn').classList.toggle('activo', modoEdicionPresActivo);
+  cerrarMenuOpcionesPres();
+  renderizarPresupuesto();
+}
+
+// ── Modificar valores ──────────────────────────────────────────
+
+function abrirModalModificarValores() {
+  cerrarMenuOpcionesPres();
+  modificarValoresCategoriasAbiertas.clear();
+  renderizarModificarValores();
+  document.getElementById('modal-modificar-valores-pres').classList.add('visible');
+}
+
+function cerrarModalModificarValores() {
+  document.getElementById('modal-modificar-valores-pres').classList.remove('visible');
+}
+
+function toggleModificarValoresCat(catId) {
+  if (modificarValoresCategoriasAbiertas.has(catId)) {
+    modificarValoresCategoriasAbiertas.delete(catId);
+  } else {
+    modificarValoresCategoriasAbiertas.add(catId);
+  }
+  renderizarModificarValores();
+}
+
+function renderizarModificarValores() {
+  const categorias = cargarCategoriasPres();
+  const subcategorias = cargarSubcategoriasPres();
+  const body = document.getElementById('pres-modificar-valores-body');
+
+  body.innerHTML = categorias.map(cat => {
+    const subcatsCat = subcategorias.filter(s => s.categoriaId === cat.id);
+    const estaAbierta = modificarValoresCategoriasAbiertas.has(cat.id);
+
+    const filaSubcats = subcatsCat.length === 0
+      ? '<div class="pres-sin-gastos">Sin subcategorías</div>'
+      : subcatsCat.map(subcat => `
+          <div class="pres-modval-subcat">
+            <span class="pres-modval-subcat-nombre">${subcat.icono ? subcat.icono + ' ' : ''}${subcat.nombre}</span>
+            <input type="number" class="pres-modval-input" data-subcat-id="${subcat.id}" value="${subcat.presupuesto || 0}" min="0">
+          </div>
+        `).join('');
+
+    return `
+      <div class="pres-modval-categoria${estaAbierta ? ' abierta' : ''}">
+        <div class="pres-modval-cat-header" onclick="toggleModificarValoresCat('${cat.id}')">
+          <span>${cat.icono || '📦'} ${cat.nombre}</span>
+          <span class="pres-modval-flecha">▾</span>
+        </div>
+        <div class="pres-modval-subcats">${filaSubcats}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function confirmarModificarValores() {
+  const subcategorias = cargarSubcategoriasPres();
+  document.querySelectorAll('#pres-modificar-valores-body .pres-modval-input').forEach(input => {
+    const subcat = subcategorias.find(s => s.id === input.dataset.subcatId);
+    if (subcat) subcat.presupuesto = parseInt(input.value) || 0;
+  });
+  guardarSubcategoriasPres(subcategorias);
+  cerrarModalModificarValores();
+  renderizarPresupuesto();
 }

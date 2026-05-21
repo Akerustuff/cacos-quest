@@ -27,7 +27,7 @@
   <!-- PANTALLA: Login -->
   <div id="screen-login" class="screen hidden">
     <div class="login-titulo">Cacos Quest</div>
-    <div class="login-version">v3.7</div>
+    <div class="login-version">v3.8</div>
     <div class="login-subtitulo">Inicia sesión para continuar</div>
     <button class="login-btn-google" onclick="loginConGoogle()">
       <span>🔑</span> Entrar con Google
@@ -81,7 +81,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.7</span>
+        <span class="menu-logo-version">v3.8</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -122,7 +122,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.7</span>
+        <span class="menu-logo-version">v3.8</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -154,7 +154,7 @@
         <div class="menu-logo">
           <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
           <span class="menu-logo-texto">Cacos Quest</span>
-          <span class="menu-logo-version">v3.7</span>
+          <span class="menu-logo-version">v3.8</span>
         </div>
         <div class="menu-jugador-wrap">
           <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -207,7 +207,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.7</span>
+        <span class="menu-logo-version">v3.8</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -261,7 +261,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.7</span>
+        <span class="menu-logo-version">v3.8</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -278,6 +278,13 @@
     </div>
     <div class="pantalla-titulo-section">
       <h2 class="pantalla-titulo">Presupuesto</h2>
+      <div class="pres-opciones-wrap">
+        <button class="pres-opciones-btn" id="pres-opciones-btn" onclick="toggleMenuOpcionesPres()">⋮</button>
+        <div class="pres-opciones-dropdown" id="pres-opciones-dropdown">
+          <button class="pres-opciones-item" id="pres-opciones-item-editar" onclick="toggleModoEdicionPres()">✏ Editar</button>
+          <button class="pres-opciones-item" onclick="abrirModalModificarValores()">💰 Modificar valores</button>
+        </div>
+      </div>
     </div>
 
     <div class="presupuesto-resumen" id="presupuesto-resumen">
@@ -460,6 +467,10 @@
         <label id="prov-editar-label">Nombre</label>
         <input type="text" id="prov-input-editar" placeholder="">
       </div>
+      <div class="prov-campo">
+        <label>Categoría</label>
+        <select id="prov-select-editar-categoria"></select>
+      </div>
       <div class="prov-modal-botones" id="prov-editar-botones">
         <button class="prov-modal-btn cancelar" onclick="cerrarModalEditar()">Cancelar</button>
         <button class="prov-modal-btn eliminar" onclick="pedirConfirmacionEliminar()">🗑 Eliminar</button>
@@ -559,13 +570,15 @@
   <div class="prov-modal-fondo" id="modal-agregar-categoria-pres">
     <div class="prov-modal">
       <div class="prov-modal-titulo">Nueva Categoría</div>
-      <div class="prov-campo">
-        <label>Icono (emoji)</label>
-        <input type="text" id="pres-cat-input-icono" placeholder="Ej: 🍕">
-      </div>
-      <div class="prov-campo">
-        <label>Nombre</label>
-        <input type="text" id="pres-cat-input-nombre" placeholder="Ej: Comida">
+      <div class="prov-campos-fila">
+        <div class="prov-campo prov-campo--emoji">
+          <label>Icono</label>
+          <input type="text" id="pres-cat-input-icono" placeholder="🍕">
+        </div>
+        <div class="prov-campo">
+          <label>Nombre</label>
+          <input type="text" id="pres-cat-input-nombre" placeholder="Ej: Comida">
+        </div>
       </div>
       <div class="prov-modal-botones">
         <button class="prov-modal-btn cancelar" onclick="cerrarModalAgregarCategoriaPres()">Cancelar</button>
@@ -578,13 +591,15 @@
   <div class="prov-modal-fondo" id="modal-editar-categoria-pres">
     <div class="prov-modal">
       <div class="prov-modal-titulo">Editar Categoría</div>
-      <div class="prov-campo">
-        <label>Icono (emoji)</label>
-        <input type="text" id="pres-edit-cat-icono" placeholder="Ej: 🍕">
-      </div>
-      <div class="prov-campo">
-        <label>Nombre</label>
-        <input type="text" id="pres-edit-cat-nombre" placeholder="Nombre de la categoría...">
+      <div class="prov-campos-fila">
+        <div class="prov-campo prov-campo--emoji">
+          <label>Icono</label>
+          <input type="text" id="pres-edit-cat-icono" placeholder="🍕">
+        </div>
+        <div class="prov-campo">
+          <label>Nombre</label>
+          <input type="text" id="pres-edit-cat-nombre" placeholder="Nombre de la categoría...">
+        </div>
       </div>
       <div class="prov-modal-botones" id="pres-edit-cat-botones">
         <button class="prov-modal-btn cancelar" onclick="cerrarModalEditarCategoriaPres()">Cancelar</button>
@@ -652,13 +667,15 @@
   <div class="prov-modal-fondo" id="modal-editar-subcategoria-pres">
     <div class="prov-modal">
       <div class="prov-modal-titulo">Editar Subcategoría</div>
-      <div class="prov-campo">
-        <label>Icono (emoji)</label>
-        <input type="text" id="pres-edit-subcat-icono" placeholder="Ej: 🛒">
-      </div>
-      <div class="prov-campo">
-        <label>Nombre</label>
-        <input type="text" id="pres-edit-subcat-nombre" placeholder="Nombre...">
+      <div class="prov-campos-fila">
+        <div class="prov-campo prov-campo--emoji">
+          <label>Icono</label>
+          <input type="text" id="pres-edit-subcat-icono" placeholder="🛒">
+        </div>
+        <div class="prov-campo">
+          <label>Nombre</label>
+          <input type="text" id="pres-edit-subcat-nombre" placeholder="Nombre...">
+        </div>
       </div>
       <div class="prov-campo">
         <label>Presupuesto mensual ($)</label>
@@ -672,6 +689,18 @@
       <div class="prov-modal-botones" id="pres-confirmar-eliminar-subcat-botones" style="display:none">
         <button class="prov-modal-btn cancelar" onclick="cancelarEliminarSubcategoriaPres()">← Cancelar</button>
         <button class="prov-modal-btn peligro" onclick="confirmarEliminarSubcategoriaPres()">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Modificar valores de presupuesto -->
+  <div class="prov-modal-fondo" id="modal-modificar-valores-pres">
+    <div class="prov-modal prov-modal--alto">
+      <div class="prov-modal-titulo">Modificar Valores</div>
+      <div id="pres-modificar-valores-body"></div>
+      <div class="prov-modal-botones" style="margin-top:12px; flex-shrink:0;">
+        <button class="prov-modal-btn cancelar" onclick="cerrarModalModificarValores()">Cancelar</button>
+        <button class="prov-modal-btn confirmar" onclick="confirmarModificarValores()">Guardar</button>
       </div>
     </div>
   </div>
