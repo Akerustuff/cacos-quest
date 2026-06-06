@@ -124,6 +124,26 @@ async function inicializarFirebase() {
       if (Object.keys(datosLocales).length > 0) {
         await docEstado.set(datosLocales);
       }
+    } else {
+      const datos = snapEstado.data();
+      const hayNegativos = ['puntos_mono', 'puntos_oso', 'xp_mono', 'xp_oso']
+        .some(function(clave) { return typeof datos[clave] === 'number' && datos[clave] < 0; });
+
+      if (hayNegativos) {
+        const recalculados = recalcularPuntosDesdeEstado(datos);
+        const correccion = {
+          puntos_mono: recalculados.mono,
+          puntos_oso:  recalculados.oso,
+          xp_mono:     recalculados.mono,
+          xp_oso:      recalculados.oso
+        };
+        await docEstado.set(correccion, { merge: true });
+        _actualizandoDesdeFirebase = true;
+        Object.keys(correccion).forEach(function(clave) {
+          localStorage.setItem(clave, JSON.stringify(correccion[clave]));
+        });
+        _actualizandoDesdeFirebase = false;
+      }
     }
 
     if (!snapProvisiones.exists || !snapProvisiones.data().categorias) {
