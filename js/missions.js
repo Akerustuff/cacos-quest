@@ -338,10 +338,20 @@ function renderizarMisiones() {
         mapaCompartida[m.id] = !!m.compartida;
     });
 
+    // Solo procesar las claves del ciclo activo actual
+    var clavesActivas = [
+        getKeyDiarias(),
+        'estado_diarias_pers_mono_' + fechaHoy(),
+        'estado_diarias_pers_oso_' + fechaHoy(),
+        getKeySemanales(),
+        getKeyMensuales(),
+        'estado_mensuales_pers_mono_' + fechaHoy().slice(0, 7),
+        'estado_mensuales_pers_oso_' + fechaHoy().slice(0, 7)
+    ];
+
     var totales = { mono: 0, oso: 0 };
 
-    Object.keys(datos).forEach(function(key) {
-        if (!key.startsWith('estado_')) return;
+    clavesActivas.forEach(function(key) {
         var estado = datos[key];
         if (!estado || typeof estado !== 'object') return;
 
@@ -370,16 +380,13 @@ function renderizarMisiones() {
         });
     });
 
-    // Buffs de grupos semanales completos
-    Object.keys(datos).forEach(function(key) {
-        if (!key.startsWith('estado_semanales_')) return;
-        var estado = datos[key];
-        if (!estado) return;
-
+    // Buffs del grupo semanal activo
+    var estadoSemanales = datos[getKeySemanales()];
+    if (estadoSemanales) {
         MISIONES_SEMANALES_GRUPALES.forEach(function(grupo) {
             var jugadoresParticipantes = new Set();
             var todasHechas = grupo.subtareas.every(function(subtarea) {
-                var valor = estado[subtarea.id];
+                var valor = estadoSemanales[subtarea.id];
                 if (valor === 'mono' || valor === 'oso') jugadoresParticipantes.add(valor);
                 return !!valor;
             });
@@ -395,7 +402,7 @@ function renderizarMisiones() {
                 }
             }
         });
-    });
+    }
 
     return totales;
   }
