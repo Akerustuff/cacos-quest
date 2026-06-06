@@ -318,23 +318,105 @@ function renderizarMisiones() {
       }
   }
 
+  function recalcularPuntosDesdeEstado(datos) {
+    const mapaPuntos = {};
+    const mapaCompartida = {};
+
+    MISIONES_DIARIAS_PERSONALES.forEach(function(m) { mapaPuntos[m.id] = m.puntos; });
+    MISIONES_DIARIAS_HOGAR.forEach(function(m) { mapaPuntos[m.id] = m.puntos; });
+    MISIONES_SEMANALES_SUELTAS.forEach(function(m) {
+        mapaPuntos[m.id] = m.puntos;
+        mapaCompartida[m.id] = !!m.compartida;
+    });
+    MISIONES_SEMANALES_GRUPALES.forEach(function(grupo) {
+        grupo.subtareas.forEach(function(s) { mapaPuntos[s.id] = s.puntos; });
+    });
+    MISIONES_MENSUALES.forEach(function(m) { mapaPuntos[m.id] = m.puntos; });
+    var misionesCustom = Storage.load('misiones_custom') || [];
+    misionesCustom.forEach(function(m) {
+        mapaPuntos[m.id] = m.puntos;
+        mapaCompartida[m.id] = !!m.compartida;
+    });
+
+    var totales = { mono: 0, oso: 0 };
+
+    Object.keys(datos).forEach(function(key) {
+        if (!key.startsWith('estado_')) return;
+        var estado = datos[key];
+        if (!estado || typeof estado !== 'object') return;
+
+        var jugadorPersonal = null;
+        if (key.includes('_pers_')) {
+            var despuesDePers = key.split('_pers_')[1] || '';
+            if (despuesDePers.startsWith('mono')) jugadorPersonal = 'mono';
+            else if (despuesDePers.startsWith('oso')) jugadorPersonal = 'oso';
+        }
+
+        Object.keys(estado).forEach(function(misionId) {
+            var valor = estado[misionId];
+            if (!valor) return;
+            var puntos = mapaPuntos[misionId];
+            if (!puntos) return;
+
+            if (mapaCompartida[misionId]) {
+                var mitad = Math.ceil(puntos / 2);
+                totales.mono += mitad;
+                totales.oso += mitad;
+            } else if (jugadorPersonal) {
+                totales[jugadorPersonal] += puntos;
+            } else if (valor === 'mono' || valor === 'oso') {
+                totales[valor] += puntos;
+            }
+        });
+    });
+
+    // Buffs de grupos semanales completos
+    Object.keys(datos).forEach(function(key) {
+        if (!key.startsWith('estado_semanales_')) return;
+        var estado = datos[key];
+        if (!estado) return;
+
+        MISIONES_SEMANALES_GRUPALES.forEach(function(grupo) {
+            var jugadoresParticipantes = new Set();
+            var todasHechas = grupo.subtareas.every(function(subtarea) {
+                var valor = estado[subtarea.id];
+                if (valor === 'mono' || valor === 'oso') jugadoresParticipantes.add(valor);
+                return !!valor;
+            });
+
+            if (todasHechas) {
+                var puntosBuff = grupo.puntosBuffCompleto;
+                if (jugadoresParticipantes.size > 1) {
+                    var mitadBuff = Math.ceil(puntosBuff / 2);
+                    totales.mono += mitadBuff;
+                    totales.oso += mitadBuff;
+                } else if (jugadoresParticipantes.size === 1) {
+                    totales[[...jugadoresParticipantes][0]] += puntosBuff;
+                }
+            }
+        });
+    });
+
+    return totales;
+  }
+
   function obtenerPuntos() {
     return Storage.load('puntos_' + Players.current) || 0;
   }
 
   function sumarPuntos(cantidad) {
     const puntosActuales = obtenerPuntos();
-    Storage.save('puntos_' + Players.current, puntosActuales + cantidad);
+    Storage.save('puntos_' + Players.current, Math.max(0, puntosActuales + cantidad));
 
     const xpActual = Storage.load('xp_' + Players.current) || 0;
-    Storage.save('xp_' + Players.current, xpActual + cantidad);
+    Storage.save('xp_' + Players.current, Math.max(0, xpActual + cantidad));
   }
 
   function sumarPuntosJugador(jugador, cantidad) {
     const puntos = Storage.load('puntos_' + jugador) || 0;
-    Storage.save('puntos_' + jugador, puntos + cantidad);
+    Storage.save('puntos_' + jugador, Math.max(0, puntos + cantidad));
     const xp = Storage.load('xp_' + jugador) || 0;
-    Storage.save('xp_' + jugador, xp + cantidad);
+    Storage.save('xp_' + jugador, Math.max(0, xp + cantidad));
   }
 
   function sumarPuntosAmbosJugadores(total) {
