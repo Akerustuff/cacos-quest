@@ -126,16 +126,27 @@ async function inicializarFirebase() {
       }
     } else {
       const datos = snapEstado.data();
-      const hayNegativos = ['puntos_mono', 'puntos_oso', 'xp_mono', 'xp_oso']
-        .some(function(clave) { return typeof datos[clave] === 'number' && datos[clave] < 0; });
+      const recalculados = recalcularPuntosDesdeEstado(datos);
 
-      if (hayNegativos) {
-        const recalculados = recalcularPuntosDesdeEstado(datos);
+      const puntosMono = typeof datos.puntos_mono === 'number' ? datos.puntos_mono : 0;
+      const puntosOso  = typeof datos.puntos_oso  === 'number' ? datos.puntos_oso  : 0;
+      const xpMono     = typeof datos.xp_mono     === 'number' ? datos.xp_mono     : 0;
+      const xpOso      = typeof datos.xp_oso      === 'number' ? datos.xp_oso      : 0;
+
+      const corregidoMono = Math.max(puntosMono, recalculados.mono);
+      const corregidoOso  = Math.max(puntosOso,  recalculados.oso);
+      const corregidoXpMono = Math.max(xpMono, recalculados.mono);
+      const corregidoXpOso  = Math.max(xpOso,  recalculados.oso);
+
+      const hayDiferencia = corregidoMono !== puntosMono || corregidoOso !== puntosOso
+                         || corregidoXpMono !== xpMono   || corregidoXpOso !== xpOso;
+
+      if (hayDiferencia) {
         const correccion = {
-          puntos_mono: recalculados.mono,
-          puntos_oso:  recalculados.oso,
-          xp_mono:     recalculados.mono,
-          xp_oso:      recalculados.oso
+          puntos_mono: corregidoMono,
+          puntos_oso:  corregidoOso,
+          xp_mono:     corregidoXpMono,
+          xp_oso:      corregidoXpOso
         };
         await docEstado.set(correccion, { merge: true });
         _actualizandoDesdeFirebase = true;
