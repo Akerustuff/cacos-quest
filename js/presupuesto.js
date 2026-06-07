@@ -70,6 +70,12 @@ function formatearPesos(monto) {
   return '$' + monto.toLocaleString('es-CL');
 }
 
+function formatearFechaGasto(fecha) {
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const [, mes, dia] = fecha.split('-');
+  return parseInt(dia) + ' ' + meses[parseInt(mes) - 1];
+}
+
 const PALETA_SUBCATEGORIAS = [
   '#4caf7d', '#5b8edb', '#e8a838', '#c47ed4',
   '#e05c5c', '#4ec9c9', '#e87d4e', '#a0c44c',
@@ -121,7 +127,8 @@ function renderizarPresupuesto() {
     const coloresCat = generarColoresRubro(rubrocat ? rubrocat.clase : '', subcatsCat.length + 1);
 
     const filasSubcategorias = subcatsCat.map((subcat, subcatIdx) => {
-      const gastosSubcat = gastosCat.filter(g => g.subcategoriaId === subcat.id);
+      const gastosSubcat = gastosCat.filter(g => g.subcategoriaId === subcat.id)
+        .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
       const gastadoSubcat = gastosSubcat.reduce((suma, g) => suma + g.monto, 0);
       const porcentajeSubcat = subcat.presupuesto > 0 ? Math.min(100, (gastadoSubcat / subcat.presupuesto) * 100) : 0;
       const esPeligroSubcat = gastadoSubcat > subcat.presupuesto;
@@ -151,6 +158,7 @@ function renderizarPresupuesto() {
                   <span class="pres-gasto-jugador">${Players.list[g.jugador]?.emoji || '👤'}</span>
                   <div class="pres-gasto-info">
                     <span class="pres-gasto-titulo">${g.titulo}</span>
+                    ${g.fecha ? `<span class="pres-gasto-fecha">${formatearFechaGasto(g.fecha)}</span>` : ''}
                   </div>
                   <span class="pres-gasto-monto">${formatearPesos(g.monto)}</span>
                   <button class="pres-gasto-btn-eliminar" onclick="eliminarGasto('${g.id}')">🗑</button>
@@ -162,12 +170,14 @@ function renderizarPresupuesto() {
       `;
     }).join('');
 
-    const gastossinSubcat = gastosCat.filter(g => !g.subcategoriaId || !subcatsCat.find(s => s.id === g.subcategoriaId));
+    const gastossinSubcat = gastosCat.filter(g => !g.subcategoriaId || !subcatsCat.find(s => s.id === g.subcategoriaId))
+      .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
     const filasSinSubcat = gastossinSubcat.map(g => `
       <div class="pres-gasto-item">
         <span class="pres-gasto-jugador">${Players.list[g.jugador]?.emoji || '👤'}</span>
         <div class="pres-gasto-info">
           <span class="pres-gasto-titulo">${g.titulo}</span>
+          ${g.fecha ? `<span class="pres-gasto-fecha">${formatearFechaGasto(g.fecha)}</span>` : ''}
         </div>
         <span class="pres-gasto-monto">${formatearPesos(g.monto)}</span>
         <button class="pres-gasto-btn-eliminar" onclick="eliminarGasto('${g.id}')">🗑</button>
@@ -434,6 +444,7 @@ function abrirModalAgregarGasto(catIdPredefinido, subcatIdPredefinido) {
   if (subcatIdPredefinido) document.getElementById('pres-gasto-select-subcategoria').value = subcatIdPredefinido;
   document.getElementById('pres-gasto-input-titulo').value = '';
   document.getElementById('pres-gasto-input-monto').value = '';
+  document.getElementById('pres-gasto-input-fecha').value = new Date().toISOString().slice(0, 10);
   document.getElementById('modal-agregar-gasto').classList.add('visible');
 }
 
@@ -455,6 +466,7 @@ function confirmarAgregarGasto() {
   const monto = parseInt(document.getElementById('pres-gasto-input-monto').value);
   const categoriaId = document.getElementById('pres-gasto-select-categoria').value;
   const subcategoriaId = document.getElementById('pres-gasto-select-subcategoria').value || null;
+  const fecha = document.getElementById('pres-gasto-input-fecha').value || new Date().toISOString().slice(0, 10);
   if (!titulo || !monto) return;
 
   const mes = obtenerMesActual();
@@ -465,7 +477,7 @@ function confirmarAgregarGasto() {
     monto,
     categoriaId,
     subcategoriaId,
-    fecha: new Date().toISOString().slice(0, 10),
+    fecha,
     jugador: Players.current
   });
   guardarGastosMes(mes, gastos);
@@ -714,7 +726,8 @@ function renderizarPresupuestosHistoricos() {
       const catAbierta = histCategoriasAbiertas.has(catKey);
 
       const filasSubcats = subcatsCat.map(subcat => {
-        const gastosSubcat = gastosCat.filter(g => g.subcategoriaId === subcat.id);
+        const gastosSubcat = gastosCat.filter(g => g.subcategoriaId === subcat.id)
+          .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
         if (gastosSubcat.length === 0) return '';
 
         const gastadoSubcat = gastosSubcat.reduce((suma, g) => suma + g.monto, 0);
@@ -741,6 +754,7 @@ function renderizarPresupuestosHistoricos() {
                   <span class="pres-gasto-jugador">${Players.list[g.jugador]?.emoji || '👤'}</span>
                   <div class="pres-gasto-info">
                     <span class="pres-gasto-titulo">${g.titulo}</span>
+                    ${g.fecha ? `<span class="pres-gasto-fecha">${formatearFechaGasto(g.fecha)}</span>` : ''}
                   </div>
                   <span class="pres-gasto-monto">${formatearPesos(g.monto)}</span>
                 </div>

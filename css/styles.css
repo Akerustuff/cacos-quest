@@ -2162,6 +2162,12 @@ body {
     color: var(--text);
   }
 
+  .pres-gasto-fecha {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    color: var(--color-texto-suave);
+  }
+
   .pres-gasto-monto {
     font-family: var(--font-ui);
     font-size: 0.95rem;
