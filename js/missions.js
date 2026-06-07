@@ -338,16 +338,37 @@ function renderizarMisiones() {
         mapaCompartida[m.id] = !!m.compartida;
     });
 
+    // Generar todas las fechas desde el lunes de esta semana hasta hoy
+    var fechasSemanaActual = (function() {
+        var ahora = new Date();
+        ahora.setTime(ahora.getTime() - 5 * 60 * 60 * 1000);
+        var diasDesdeMonday = (ahora.getDay() + 6) % 7;
+        var lunes = new Date(ahora);
+        lunes.setDate(lunes.getDate() - diasDesdeMonday);
+        var fechas = [];
+        var cursor = new Date(lunes);
+        while (cursor <= ahora) {
+            var y = cursor.getFullYear();
+            var mo = String(cursor.getMonth() + 1).padStart(2, '0');
+            var d = String(cursor.getDate()).padStart(2, '0');
+            fechas.push(y + '-' + mo + '-' + d);
+            cursor.setDate(cursor.getDate() + 1);
+        }
+        return fechas;
+    })();
+
     // Solo procesar las claves del ciclo activo actual
     var clavesActivas = [
-        getKeyDiarias(),
-        'estado_diarias_pers_mono_' + fechaHoy(),
-        'estado_diarias_pers_oso_' + fechaHoy(),
         getKeySemanales(),
         getKeyMensuales(),
         'estado_mensuales_pers_mono_' + fechaHoy().slice(0, 7),
         'estado_mensuales_pers_oso_' + fechaHoy().slice(0, 7)
     ];
+    fechasSemanaActual.forEach(function(fecha) {
+        clavesActivas.push('estado_diarias_' + fecha);
+        clavesActivas.push('estado_diarias_pers_mono_' + fecha);
+        clavesActivas.push('estado_diarias_pers_oso_' + fecha);
+    });
 
     var totales = { mono: 0, oso: 0 };
 
