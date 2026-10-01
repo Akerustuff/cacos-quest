@@ -1132,7 +1132,8 @@ body {
       padding: 24px 20px 12px;
   }
 
-  #screen-presupuesto .pantalla-titulo-section {
+  #screen-presupuesto .pantalla-titulo-section,
+  #screen-missions .pantalla-titulo-section {
       display: flex;
       align-items: center;
       justify-content: center;

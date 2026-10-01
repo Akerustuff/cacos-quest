@@ -13,19 +13,23 @@ const MISIONES_DIARIAS_PERSONALES = [,
 
 const MISIONES_DIARIAS_HOGAR = [
     { id: 'tender_cama', nombre: 'Levantar el Campamento', desc: 'Tender la cama', puntos: 2 },
-    { id: 'lavar_platos', nombre: 'Purificación de Cristal', desc: 'Lavar platos', puntos: 2 },
-    { id: 'secar_platos', nombre: 'Almacenamiento de Cristal', desc: 'Secar platos', puntos: 2 },
+    { id: 'lavar_platos_desayuno', nombre: 'Purificación de Cristal - Desayuno', desc: 'Lavar platos del desayuno', puntos: 2 },
+    { id: 'lavar_platos_almuerzo', nombre: 'Purificación de Cristal - Almuerzo', desc: 'Lavar platos del almuerzo', puntos: 2 },
+    { id: 'lavar_platos_cena', nombre: 'Purificación de Cristal - Cena', desc: 'Lavar platos de la cena', puntos: 2 },
+    { id: 'secar_platos_desayuno', nombre: 'Almacenamiento de Cristal - Desayuno', desc: 'Secar platos del desayuno', puntos: 2 },
+    { id: 'secar_platos_almuerzo', nombre: 'Almacenamiento de Cristal - Almuerzo', desc: 'Secar platos del almuerzo', puntos: 2 },
+    { id: 'secar_platos_cena', nombre: 'Almacenamiento de Cristal - Cena', desc: 'Secar platos de la cena', puntos: 2 },
     { id: 'vasos_alacena', nombre: 'El Sereno del Cristal', desc: 'Dejar todos los vasos en desuso en la alacena', puntos: 2 },
     { id: 'limpiar_mesones', nombre: 'Restauración de los Mesones', desc: 'Limpiar los mesones de la cocina', puntos: 5 },
     { id: 'ropa_del_suelo', nombre: 'El Suelo es Lava', desc: 'No dejar ropa en el suelo al final del día', puntos: 2 },
-    { id: 'guardar_almuerzo', nombre: 'Preparar provisiones monunas', desc: 'Guardar el almuerzo de mono para el día siguiente', puntos: 1 }
+    { id: 'limpiar_caldero', nombre: 'Limpieza del Caldero Mágico', desc: 'Limpiar la Thermomix', puntos: 2 }
 
 ]
 
 const MISIONES_SEMANALES_GRUPALES = [
     {
         id: 'limpiar_habitación',
-        nombre: 'Orden del Portal del Sueño',
+        nombre: '🛏️ Orden del Portal del Sueño',
         desc: 'Limpiar habitación',
         buff: 'Descanso del Guerrero',
         puntosBuffCompleto: 20,
@@ -37,7 +41,7 @@ const MISIONES_SEMANALES_GRUPALES = [
     },
     {
         id: 'limpiar_oficina_mono',
-        nombre: 'Purga del Santuario Monuno',
+        nombre: '🐵 Purga del Santuario Monuno',
         desc: 'Limpiar oficina de Mono',
         buff: 'Claridad Mental del Sabio Mono',
         puntosBuffCompleto: 20,
@@ -49,7 +53,7 @@ const MISIONES_SEMANALES_GRUPALES = [
     },
     {
           id: 'limpiar_oficina_oso',
-          nombre: 'Purga del Santuario Osuno',
+          nombre: '🐻 Purga del Santuario Osuno',
           desc: 'Limpiar oficina de Oso',
           buff: 'Claridad Mental del Sabio Oso',
           puntosBuffCompleto: 20,
@@ -61,7 +65,7 @@ const MISIONES_SEMANALES_GRUPALES = [
       },
       {
           id: 'limpiar_bano_principal',
-          nombre: 'Restauración de la Cascada Mayor',
+          nombre: '🚿 Restauración de la Cascada Mayor',
           desc: 'Limpiar baño principal',
           buff: 'Purificación Total Mayor',
           puntosBuffCompleto: 20,
@@ -74,7 +78,7 @@ const MISIONES_SEMANALES_GRUPALES = [
       },
       {
           id: 'limpiar_bano_secundario',
-          nombre: 'Restauración de la Cascada Menor',
+          nombre: '🪠 Restauración de la Cascada Menor',
           desc: 'Limpiar baño secundario',
           buff: 'Purificación Total Menor',
           puntosBuffCompleto: 20,
@@ -87,7 +91,7 @@ const MISIONES_SEMANALES_GRUPALES = [
       },
       {
           id: 'limpiar_cocina',
-          nombre: 'Brillo en el Corazón del Hogar',
+          nombre: '🍳 Brillo en el Corazón del Hogar',
           desc: 'Limpiar la cocina',
           buff: 'Rico olor del hogar',
           puntosBuffCompleto: 20,
@@ -100,7 +104,7 @@ const MISIONES_SEMANALES_GRUPALES = [
       },
       {
           id: 'limpiar_salon',
-          nombre: 'Orden del Salón de Guerra',
+          nombre: '🛋️ Orden del Salón de Guerra',
           desc: 'Limpiar el salón',
           buff: 'Estratega Maestro',
           puntosBuffCompleto: 20,
@@ -111,43 +115,125 @@ const MISIONES_SEMANALES_GRUPALES = [
               { id: 'limpiar_salon_superficies', nombre: 'Brillo del Escudo del Hogar', desc: 'Limpiar superficies', puntos: 20 }
           ]
       }
+      ,{
+          id: 'actualizacion_equipo',
+          nombre: '👕 Actualización de Equipo',
+          desc: 'Lavar y guardar la ropa de la semana',
+          buff: 'Inventario Actualizado',
+          puntosBuffCompleto: 15,
+          subtareas: [
+              { id: 'lavar_ropa',  nombre: 'Mantenimiento del Equipo',  desc: 'Lavar la ropa',             puntos: 25 },
+              { id: 'doblar_ropa', nombre: 'Almacenamiento del Equipo', desc: 'Doblar y guardar la ropa',  puntos: 25 }
+          ]
+      },{
+          id: 'vigilancia_fronteras',
+          nombre: '🏰 Vigilancia de las Fronteras del Reino',
+          desc: 'Limpiar las zonas exteriores del hogar',
+          buff: 'Fronteras Seguras',
+          puntosBuffCompleto: 20,
+          subtareas: [
+              { id: 'limpiar_recibidor',          nombre: 'Despeje de la Senda del Viajero',  desc: 'Limpiar recibidor y pasillo',   puntos: 30 },
+              { id: 'limpiar_logia',               nombre: 'Expedición a la Logia Olvidada',   desc: 'Limpiar la logia',              puntos: 30 },
+              { id: 'limpiar_terraza',             nombre: 'Refuerzo de la Atalaya Principal', desc: 'Limpiar la terraza principal',  puntos: 30 },
+              { id: 'limpiar_terraza_secundaria',  nombre: 'Refuerzo de la Atalaya Secundaria',desc: 'Limpiar la terraza secundaria', puntos: 30 }
+          ]
+      },{
+          id: 'acopio_provisiones',
+          nombre: '🍎 Acopio de Provisiones',
+          desc: 'Gestionar las provisiones del hogar',
+          buff: 'Alacena Reabastecida',
+          puntosBuffCompleto: 10,
+          subtareas: [
+              { id: 'planificar_comidas',    nombre: 'Estrategia de Suministros del Reino', desc: 'Planificar comidas de la semana',     puntos: 30 },
+              { id: 'actualizar_compras',    nombre: 'Censo de Provisiones Necesarias',     desc: 'Actualizar lista de compras',         puntos: 30 },
+              { id: 'hacer_mercado',         nombre: 'Incursión en el Bazar del Pueblo',    desc: 'Hacer mercado el día de oferta',      puntos: 40 },
+              { id: 'almacenar_provisiones', nombre: 'Almacenar Provisiones',               desc: 'Guardar las compras del mercado',     puntos: 10 }
+          ]
+      },{
+          id: 'exilio_residuos',
+          nombre: '🗑️ Exilio de los Residuos',
+          desc: 'Sacar todas las basuras durante la semana',
+          buff: 'Depuración Completada',
+          puntosBuffCompleto: 10,
+          subtareas: [
+              { id: 'basura_1', nombre: 'Primer Exilio',  desc: 'Sacar todas las basuras 1ra vez', puntos: 20 },
+              { id: 'basura_2', nombre: 'Segundo Exilio', desc: 'Sacar todas las basuras 2da vez', puntos: 20 },
+              { id: 'basura_3', nombre: 'Tercer Exilio',  desc: 'Sacar todas las basuras 3ra vez', puntos: 20 }
+          ]
+      },{
+          id: 'torbellino_polvo',
+          nombre: '🌪️ Torbellino Erradicador de Polvo',
+          desc: 'Aspirar el hogar durante la semana',
+          buff: 'Temporada de Tornados',
+          puntosBuffCompleto: 10,
+          subtareas: [
+              { id: 'aspirar_1', nombre: 'Primer Torbellino',  desc: 'Aspirar 1ra vez', puntos: 20 },
+              { id: 'aspirar_2', nombre: 'Segundo Torbellino', desc: 'Aspirar 2da vez', puntos: 20 },
+              { id: 'aspirar_3', nombre: 'Tercer Torbellino',  desc: 'Aspirar 3ra vez', puntos: 20 }
+          ]
+      },{
+          id: 'sendero_brillante',
+          nombre: '🧹 Realce del Sendero Brillante',
+          desc: 'Trapear el hogar durante la semana',
+          buff: 'Camino Reluciente',
+          puntosBuffCompleto: 10,
+          subtareas: [
+              { id: 'trapear_1', nombre: 'Primera Trapeada',  desc: 'Pasar trapeador 1ra vez', puntos: 20 },
+              { id: 'trapear_2', nombre: 'Segunda Trapeada', desc: 'Pasar trapeador 2da vez', puntos: 20 },
+              { id: 'trapear_3', nombre: 'Tercera Trapeada',  desc: 'Pasar trapeador 3ra vez', puntos: 20 }
+          ]
+      },{
+          id: 'entrenamiento_oso',
+          nombre: '⚔️ Entrenamiento del Guerrero Osuno 🐻',
+          desc: 'Ejercicios de fuerza de la semana',
+          buff: 'Fuerza Mejorada',
+          puntosBuffCompleto: 20,
+          jugador: 'oso',
+          subtareas: [
+              { id: 'entrenamiento_oso_1', nombre: 'Entrenamiento I',   desc: 'Ejercicios de fuerza 1', puntos: 20 },
+              { id: 'entrenamiento_oso_2', nombre: 'Entrenamiento II',  desc: 'Ejercicios de fuerza 2', puntos: 20 },
+              { id: 'entrenamiento_oso_3', nombre: 'Entrenamiento III', desc: 'Ejercicios de fuerza 3', puntos: 20 },
+              { id: 'entrenamiento_oso_4', nombre: 'Entrenamiento IV',  desc: 'Ejercicios de fuerza 4', puntos: 20 },
+              { id: 'entrenamiento_oso_5', nombre: 'Entrenamiento V',   desc: 'Ejercicios de fuerza 5', puntos: 20 }
+          ]
+      },{
+          id: 'entrenamiento_mono',
+          nombre: '⚔️ Entrenamiento del Guerrero Monuno 🐵',
+          desc: 'Ejercicios de fuerza de la semana',
+          buff: 'Fuerza Mejorada',
+          puntosBuffCompleto: 20,
+          jugador: 'mono',
+          subtareas: [
+              { id: 'entrenamiento_mono_1', nombre: 'Entrenamiento I',   desc: 'Ejercicios de fuerza 1', puntos: 20 },
+              { id: 'entrenamiento_mono_2', nombre: 'Entrenamiento II',  desc: 'Ejercicios de fuerza 2', puntos: 20 },
+              { id: 'entrenamiento_mono_3', nombre: 'Entrenamiento III', desc: 'Ejercicios de fuerza 3', puntos: 20 }
+          ]
+      },{
+          id: 'coccion_banquete',
+          nombre: '🍽️ Cocción del Banquete',
+          desc: 'Cocinar los almuerzos de la semana',
+          buff: 'Sustento Asegurado',
+          puntosBuffCompleto: 20,
+          subtareas: [
+              { id: 'cocinar_almuerzo_1', nombre: 'Banquete I',   desc: 'Cocinar almuerzo 1', puntos: 25 },
+              { id: 'cocinar_almuerzo_2', nombre: 'Banquete II',  desc: 'Cocinar almuerzo 2', puntos: 25 },
+              { id: 'cocinar_almuerzo_3', nombre: 'Banquete III', desc: 'Cocinar almuerzo 3', puntos: 25 },
+              { id: 'cocinar_almuerzo_4', nombre: 'Banquete IV',  desc: 'Cocinar almuerzo 4', puntos: 25 }
+          ]
+      }
 ];
 
 const MISIONES_SEMANALES_SUELTAS = [
-      { id: 'limpiar_recibidor', nombre: 'Despeje de la Senda del Viajero', desc: 'Limpiar recibidor y pasillo', puntos: 30, jugador: null },
-      { id: 'limpiar_logia', nombre: 'Expedición a la Logia Olvidada', desc: 'Limpiar la logia', puntos: 30, jugador: null },
-      { id: 'limpiar_terraza', nombre: 'Conquista de la Atalaya Externa', desc: 'Limpiar la terraza', puntos: 30, jugador: null },
-      { id: 'planificar_comidas', nombre: 'Estrategia de Suministros del Reino', desc: 'Planificar comidas de la semana', puntos: 30, jugador: null, compartida: true },
-      { id: 'actualizar_compras', nombre: 'Censo de Provisiones Necesarias', desc: 'Actualizar lista de compras', puntos: 30, jugador: null, compartida: true },
-      { id: 'hacer_mercado', nombre: 'Incursión en el Mercado de los Tesoros', desc: 'Hacer mercado el día de oferta', puntos: 40, jugador: null, compartida: true },
-      { id: 'cocinar_almuerzo_1', nombre: 'Gran Alquimia del Banquete Fase I', desc: 'Cocinar almuerzo 1', puntos: 25, jugador: null },
-      { id: 'cocinar_almuerzo_2', nombre: 'Gran Alquimia del Banquete Fase II', desc: 'Cocinar almuerzo 2', puntos: 25, jugador: null },
-      { id: 'cocinar_almuerzo_3', nombre: 'Gran Alquimia del Banquete Fase III', desc: 'Cocinar almuerzo 3', puntos: 25, jugador: null },
-      { id: 'cocinar_almuerzo_4', nombre: 'Gran Alquimia del Banquete Fase IV', desc: 'Cocinar almuerzo 4', puntos: 25, jugador: null },
-      { id: 'ejercicio_fuerza_1_mono', nombre: 'Forja del Guerrero de Bronce 🐵', desc: 'Hacer ejercicios de fuerza 1', puntos: 15, jugador: 'mono' },
-      { id: 'ejercicio_fuerza_1_oso', nombre: 'Forja del Guerrero de Bronce 🐻', desc: 'Hacer ejercicios de fuerza 1', puntos: 15, jugador: 'oso' },
-      { id: 'ejercicio_fuerza_2_mono', nombre: 'Forja del Guerrero de Plata 🐵', desc: 'Hacer ejercicios de fuerza 2', puntos: 15, jugador: 'mono' },
-      { id: 'ejercicio_fuerza_2_oso', nombre: 'Forja del Guerrero de Plata 🐻', desc: 'Hacer ejercicios de fuerza 2', puntos: 15, jugador: 'oso' },
-      { id: 'ejercicio_fuerza_3_mono', nombre: 'Forja del Guerrero de Oro 🐵', desc: 'Hacer ejercicios de fuerza 3', puntos: 15, jugador: 'mono' },
-      { id: 'ejercicio_fuerza_3_oso', nombre: 'Forja del Guerrero de Oro 🐻', desc: 'Hacer ejercicios de fuerza 3', puntos: 15, jugador: 'oso' },
-      { id: 'lavar_ropa', nombre: 'Ritual de la Hebra Limpia (Lavado)', desc: 'Lavar la ropa', puntos: 25, jugador: null },
-      { id: 'doblar_ropa', nombre: 'Ritual de la Hebra Limpia (Armadura)', desc: 'Doblar la ropa', puntos: 25, jugador: null },
-      { id: 'aspirar_1', nombre: 'Torbellino Erradicador de Polvo I', desc: 'Aspirar 1ra vez', puntos: 20, jugador: null },
-      { id: 'aspirar_2', nombre: 'Torbellino Erradicador de Polvo II', desc: 'Aspirar 2da vez', puntos: 20, jugador: null },
-      { id: 'aspirar_3', nombre: 'Torbellino Erradicador de Polvo III', desc: 'Aspirar 3ra vez', puntos: 20, jugador: null },
-      { id: 'trapear_1', nombre: 'Rastreo del Sendero Brillante I', desc: 'Pasar trapeador 1ra vez', puntos: 20, jugador: null },
-      { id: 'trapear_2', nombre: 'Rastreo del Sendero Brillante II', desc: 'Pasar trapeador 2da vez', puntos: 20, jugador: null },
-      { id: 'trapear_3', nombre: 'Rastreo del Sendero Brillante III', desc: 'Pasar trapeador 3ra vez', puntos: 20, jugador: null },
-      { id: 'basura_1', nombre: 'Exilio de los Residuos I', desc: 'Sacar todas las basuras I', puntos: 20, jugador: null },
-      { id: 'basura_2', nombre: 'Exilio de los Residuos II', desc: 'Sacar todas las basuras II', puntos: 20, jugador: null },
-      { id: 'basura_3', nombre: 'Exilio de los Residuos III', desc: 'Sacar todas las basuras III', puntos: 20, jugador: null }
   ];
 
   const MISIONES_MENSUALES = [
       { id: 'limpiar_refrigerador', nombre: 'Cacería de la Escarcha Ancestral', desc: 'Limpieza profunda del refrigerador', puntos: 200, jugador: null },
       { id: 'limpiar_alacenas', nombre: 'Excavación en las Bóvedas de Suministros', desc: 'Limpieza profunda de las alacenas', puntos: 200, jugador: null },
       { id: 'limpiar_horno', nombre: 'Purificación del Crisol del Fuego', desc: 'Limpieza del horno', puntos: 200, jugador: null },
-      { id: 'mantenimiento_bambi', nombre: 'Bendición de la Criatura Creadora del Bosque', desc: 'Mantenimiento de Bambi', puntos: 250, jugador: null },
+      { id: 'mantenimiento_bambi',   nombre: 'Bendición de la Criatura Creadora del Bosque', desc: 'Mantenimiento de Bambi',              puntos: 250, jugador: null },
+      { id: 'mantenimiento_bambi2', nombre: 'Bendición de la Criatura Creadora Suprema',    desc: 'Mantenimiento de Bambi 2',            puntos: 250, jugador: null },
+      { id: 'limpiar_aspiradora',   nombre: 'Limpieza del Tifón Limpiador',                 desc: 'Limpieza profunda de la aspiradora',  puntos: 200, jugador: null },
+      { id: 'lavar_trapeador',      nombre: 'Ritual del Purificador de los Suelos',         desc: 'Lavar el trapeador',                  puntos: 50,  jugador: null },
       { id: 'ahorrar_mono', nombre: 'El Tesoro del Dragón', desc: 'Ahorrar según el monto acordado', puntos: 150, jugador: 'mono' },
       { id: 'ahorrar_oso', nombre: 'El Tesoro del Dragón', desc: 'Ahorrar según el monto acordado', puntos: 150, jugador: 'oso' },
       { id: 'pagar_deuda_mono', nombre: 'Aniquilación de la Sombra de la Deuda', desc: 'Pagar el monto mensual de las TDCs', puntos: 150, jugador: 'mono' },
@@ -155,25 +241,28 @@ const MISIONES_SEMANALES_SUELTAS = [
   ];
 
   const NIVELES_BATTLE_PASS = [
-      { nivel: 1,  xpRequerido: 80,   icono: '🌳', nombre: 'Bosque Burbuja', premios: [
+      { nivel: 0,  xpRequerido: 0,    icono: '🏠', nombre: 'Cuevarbol', premios: [
+        { nombre: 'Comida de Meseversario', emoji: '🎉', costo: 200 }
+      ]},
+      { nivel: 1,  xpRequerido: 400,  icono: '🌳', nombre: 'Bosque Burbuja', premios: [
         { nombre: 'Picnic en el bosque', emoji: '🧺', costo: 200},
         { nombre: 'Néctar Helado', emoji: '🍦', costo: 80},
         { nombre: 'Pase del festival de la ciudad', emoji: '🎫', costo: 300}
       ]
     },
-      { nivel: 2,  xpRequerido: 660,  icono: '🏙️', nombre: 'Monópolis', premios: [
+      { nivel: 2,  xpRequerido: 1400, icono: '🏙️', nombre: 'Monópolis', premios: [
         { nombre: 'Almuerzo en el MoniMall', emoji: '🍽️', costo: 200},
         { nombre: 'Brunch motinal', emoji: '☕', costo: 250},
         { nombre: 'Néctar Helado', emoji: '🍦', costo: 80},
         { nombre: 'Hobbybox de plata', emoji: '🥈', costo: 300}
       ] },
       
-      { nivel: 3,  xpRequerido: 1490,  icono: '🏞️', nombre: 'Lago Marquesa', premios: [
+      { nivel: 3,  xpRequerido: 2600, icono: '🏞️', nombre: 'Lago Marquesa', premios: [
         { nombre: 'Panqueques frente al lago', emoji: '🥞', costo: 200},
         { nombre: 'Néctar Helado', emoji: '🍦', costo: 80},
         { nombre: 'Hobbybox de plata', emoji: '🥈', costo: 300}
       ]},
-      { nivel: 4,  xpRequerido: 2070,  icono: '☃️', nombre: 'Valle Nevoso', premios: [
+      { nivel: 4,  xpRequerido: 4000, icono: '☃️', nombre: 'Valle Nevoso', premios: [
         { nombre: 'Cena al calor de la chimenea', emoji: '🍽️', costo: 200},
         { nombre: 'Néctar Helado', emoji: '🍦', costo: 80},
         { nombre: 'Brunch motinal', emoji: '☕', costo: 250},

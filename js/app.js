@@ -67,6 +67,14 @@
         d.classList.remove('visible');
       });
     }
+    if (!e.target.closest('#misiones-opciones-btn') && !e.target.closest('#misiones-opciones-dropdown')) {
+      var dropMisiones = document.getElementById('misiones-opciones-dropdown');
+      if (dropMisiones) dropMisiones.classList.remove('visible');
+    }
+    if (!e.target.closest('#pres-opciones-btn') && !e.target.closest('#pres-opciones-dropdown')) {
+      var dropPres = document.getElementById('pres-opciones-dropdown');
+      if (dropPres) dropPres.classList.remove('visible');
+    }
   });
 
   // Arranque: se ejecuta cuando carga la app

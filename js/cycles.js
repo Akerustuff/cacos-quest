@@ -39,11 +39,8 @@ function finalizarCiclo() {
     });
     Storage.save('registro_ciclos', registro);
 
-    Storage.save('puntos_mono', 0);
-    Storage.save('puntos_oso', 0);
     Storage.save('xp_mono', 0);
     Storage.save('xp_oso', 0);
-    Storage.save('nenurios_gastados', 0);
     Storage.save('bp_canjeados', {});
     Storage.clearMissionStates();
 

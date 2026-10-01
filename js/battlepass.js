@@ -22,9 +22,10 @@ function renderizarBattlepass() {
       document.getElementById('bp-xp-oso').textContent       = xpOso;
       document.getElementById('bp-xp-total').textContent     = xpTotal;
       document.getElementById('bp-puntos-total').textContent = disponibles;
-      document.getElementById('bp-nivel-badge').textContent  = nivelActual === 0
-          ? 'Sin nivel'
-          : NIVELES_BATTLE_PASS[nivelActual - 1].icono + ' ' + NIVELES_BATTLE_PASS[nivelActual - 1].nombre;
+      const nivelObj = NIVELES_BATTLE_PASS.find(n => n.nivel === nivelActual);
+      document.getElementById('bp-nivel-badge').textContent = nivelObj
+          ? nivelObj.icono + ' ' + nivelObj.nombre
+          : 'Sin nivel';
 
      // Construir tarjetas de niveles
     let html = '';
@@ -35,7 +36,7 @@ function renderizarBattlepass() {
           const xpAnterior  = index === 0 ? 0 : NIVELES_BATTLE_PASS[index - 1].xpRequerido;
           const xpEsteNivel = nivel.xpRequerido - xpAnterior;
           const xpProgreso  = Math.min(Math.max(xpTotal - xpAnterior, 0), xpEsteNivel);
-          const porcentaje  = Math.round((xpProgreso / xpEsteNivel) * 100);
+          const porcentaje  = xpEsteNivel > 0 ? Math.round((xpProgreso / xpEsteNivel) * 100) : 100;
 
           const estadoClass = desbloqueado ? 'desbloqueado' : (esSiguiente ? 'siguiente' : 'bloqueado');
 

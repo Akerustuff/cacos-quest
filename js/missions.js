@@ -2,6 +2,7 @@
 
 let tabActual = 'diarias';
 let gruposAbiertos = new Set();
+let modoEdicionMisionesActivo = false;
 
  function fechaHoy(){
     const ahora = new Date();
@@ -72,7 +73,7 @@ function cambiarTab(tab) {
 function buildMisionCard(mision, key, estado, esCustom = false) {
     const done = estado[mision.id] ? 'done' : '';
     const checkmark = estado[mision.id] ? '✓' : '';
-    const botonBorrar = esCustom
+    const botonBorrar = esCustom && modoEdicionMisionesActivo
         ? `<button class="btn-borrar-mision" onclick="borrarMisionCustom('${mision.id}')">🗑</button>`
         : '';
     return `
@@ -166,9 +167,11 @@ function renderizarMisiones() {
         const jugador = Players.current;
 
         html += '<h3>Grupales</h3>';
-        MISIONES_SEMANALES_GRUPALES.forEach(grupo => {
-            html += buildGrupoCard(grupo, key, estado);
-        });
+        MISIONES_SEMANALES_GRUPALES
+            .filter(grupo => !grupo.jugador || grupo.jugador === jugador)
+            .forEach(grupo => {
+                html += buildGrupoCard(grupo, key, estado);
+            });
 
         html += '<h3>Sueltas</h3>';
         MISIONES_SEMANALES_SUELTAS
@@ -484,8 +487,6 @@ function renderizarMisiones() {
     Storage.save(getKeyMensuales(), {});
     Storage.save('estado_mensuales_pers_mono_' + fechaHoy().slice(0, 7), {});
     Storage.save('estado_mensuales_pers_oso_' + fechaHoy().slice(0, 7), {});
-    Storage.save('puntos_mono', 0);
-    Storage.save('puntos_oso', 0);
     Storage.save('xp_mono', 0);
     Storage.save('xp_oso', 0);
     cerrarModalResetMisiones();
@@ -538,6 +539,28 @@ function renderizarMisiones() {
     lista.push(nueva);
     guardarMisionesCustom(lista);
     cerrarModalAgregarMision();
+    renderizarMisiones();
+  }
+
+  function toggleMenuOpcionesMisiones() {
+    document.getElementById('misiones-opciones-dropdown').classList.toggle('visible');
+    document.getElementById('misiones-opciones-btn').classList.toggle('activo');
+  }
+
+  function cerrarMenuOpcionesMisiones() {
+    document.getElementById('misiones-opciones-dropdown').classList.remove('visible');
+    document.getElementById('misiones-opciones-btn').classList.toggle('activo', modoEdicionMisionesActivo);
+  }
+
+  function toggleModoEdicionMisiones() {
+    modoEdicionMisionesActivo = !modoEdicionMisionesActivo;
+    const itemEditar = document.getElementById('misiones-opciones-item-editar');
+    if (itemEditar) {
+      itemEditar.textContent = modoEdicionMisionesActivo ? '✏ Editar ✓' : '✏ Editar';
+      itemEditar.classList.toggle('activo', modoEdicionMisionesActivo);
+    }
+    document.getElementById('misiones-opciones-btn').classList.toggle('activo', modoEdicionMisionesActivo);
+    cerrarMenuOpcionesMisiones();
     renderizarMisiones();
   }
 
