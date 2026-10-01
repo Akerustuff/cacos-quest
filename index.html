@@ -27,7 +27,7 @@
   <!-- PANTALLA: Login -->
   <div id="screen-login" class="screen hidden">
     <div class="login-titulo">Cacos Quest</div>
-    <div class="login-version">v3.12</div>
+    <div class="login-version">v3.13</div>
     <div class="login-subtitulo">Inicia sesión para continuar</div>
     <button class="login-btn-google" onclick="loginConGoogle()">
       <span>🔑</span> Entrar con Google
@@ -81,7 +81,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.12</span>
+        <span class="menu-logo-version">v3.13</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -99,8 +99,16 @@
 
     <!-- Título y puntos -->
     <div class="pantalla-titulo-section">
-      <h2 class="pantalla-titulo">Tablero de Misiones</h2>
-      <span id="puntos-display">⭐ 0 Experiencia</span>
+      <div class="misiones-titulo-centro">
+        <h2 class="pantalla-titulo">Tablero de Misiones</h2>
+        <span id="puntos-display">⭐ 0 Experiencia</span>
+      </div>
+      <div class="pres-opciones-wrap">
+        <button class="pres-opciones-btn" id="misiones-opciones-btn" onclick="toggleMenuOpcionesMisiones()">⋮</button>
+        <div class="pres-opciones-dropdown" id="misiones-opciones-dropdown">
+          <button class="pres-opciones-item" id="misiones-opciones-item-editar" onclick="toggleModoEdicionMisiones()">✏ Editar</button>
+        </div>
+      </div>
     </div>
 
     <!-- Tabs -->
@@ -122,7 +130,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.12</span>
+        <span class="menu-logo-version">v3.13</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -154,7 +162,7 @@
         <div class="menu-logo">
           <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
           <span class="menu-logo-texto">Cacos Quest</span>
-          <span class="menu-logo-version">v3.12</span>
+          <span class="menu-logo-version">v3.13</span>
         </div>
         <div class="menu-jugador-wrap">
           <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -207,7 +215,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.12</span>
+        <span class="menu-logo-version">v3.13</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -261,7 +269,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.12</span>
+        <span class="menu-logo-version">v3.13</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
