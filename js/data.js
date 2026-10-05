@@ -22,7 +22,9 @@ const MISIONES_DIARIAS_HOGAR = [
     { id: 'vasos_alacena', nombre: 'El Sereno del Cristal', desc: 'Dejar todos los vasos en desuso en la alacena', puntos: 2 },
     { id: 'limpiar_mesones', nombre: 'Restauración de los Mesones', desc: 'Limpiar los mesones de la cocina', puntos: 5 },
     { id: 'ropa_del_suelo', nombre: 'El Suelo es Lava', desc: 'No dejar ropa en el suelo al final del día', puntos: 2 },
-    { id: 'limpiar_caldero', nombre: 'Limpieza del Caldero Mágico', desc: 'Limpiar la Thermomix', puntos: 2 }
+    { id: 'limpiar_caldero', nombre: 'Limpieza del Caldero Mágico', desc: 'Limpiar la Thermomix', puntos: 2 },
+    { id: 'preparar_desayuno', nombre: 'Preparación del Sustento Diurno', desc: 'Preparar desayuno', puntos: 10 },
+    { id: 'preparar_cena', nombre: 'Preparación del Sustento Vespertino', desc: 'Preparar cena', puntos: 10 }
 
 ]
 
