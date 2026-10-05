@@ -1,6 +1,6 @@
 // sw.js — Service Worker de Cacos Quest
 
-const NOMBRE_CACHE = 'cacos-quest-v3.14';
+const NOMBRE_CACHE = 'cacos-quest-v3.15';
 
 const ARCHIVOS_A_CACHEAR = [
   './',
@@ -19,11 +19,16 @@ const ARCHIVOS_A_CACHEAR = [
   './manifest.json'
 ];
 
-// Al instalar: guardar todos los archivos en caché y activar de inmediato
+// Al instalar: guardar todos los archivos en caché y activar de inmediato.
+// cache: 'reload' obliga a bajar cada archivo del servidor, sin usar la copia
+// vieja que el navegador pueda tener guardada.
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(NOMBRE_CACHE).then(function(cache) {
-      return cache.addAll(ARCHIVOS_A_CACHEAR);
+      const solicitudes = ARCHIVOS_A_CACHEAR.map(function(archivo) {
+        return new Request(archivo, { cache: 'reload' });
+      });
+      return cache.addAll(solicitudes);
     })
   );
   self.skipWaiting();
