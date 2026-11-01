@@ -126,17 +126,21 @@ async function inicializarFirebase() {
       }
     } else {
       const datos = snapEstado.data();
-      const recalculados = recalcularPuntosDesdeEstado(datos);
+      // La XP solo cuenta misiones del ciclo actual; los Nenurios, las posteriores al último reinicio
+      const inicioCiclo = datos.ciclo_actual ? datos.ciclo_actual.inicio : null;
+      const fechaReinicioNenurios = datos.nenurios_reiniciados_fecha || null;
+      const recalculadosXp       = recalcularPuntosDesdeEstado(datos, inicioCiclo);
+      const recalculadosNenurios = recalcularPuntosDesdeEstado(datos, fechaReinicioNenurios ? diaSiguiente(fechaReinicioNenurios) : null);
 
       const puntosMono = typeof datos.puntos_mono === 'number' ? datos.puntos_mono : 0;
       const puntosOso  = typeof datos.puntos_oso  === 'number' ? datos.puntos_oso  : 0;
       const xpMono     = typeof datos.xp_mono     === 'number' ? datos.xp_mono     : 0;
       const xpOso      = typeof datos.xp_oso      === 'number' ? datos.xp_oso      : 0;
 
-      const corregidoMono = Math.max(puntosMono, recalculados.mono);
-      const corregidoOso  = Math.max(puntosOso,  recalculados.oso);
-      const corregidoXpMono = Math.max(xpMono, recalculados.mono);
-      const corregidoXpOso  = Math.max(xpOso,  recalculados.oso);
+      const corregidoMono = Math.max(puntosMono, recalculadosNenurios.mono);
+      const corregidoOso  = Math.max(puntosOso,  recalculadosNenurios.oso);
+      const corregidoXpMono = Math.max(xpMono, recalculadosXp.mono);
+      const corregidoXpOso  = Math.max(xpOso,  recalculadosXp.oso);
 
       const hayDiferencia = corregidoMono !== puntosMono || corregidoOso !== puntosOso
                          || corregidoXpMono !== xpMono   || corregidoXpOso !== xpOso;

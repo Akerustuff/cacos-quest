@@ -1739,6 +1739,8 @@ body {
 
   .bp-nivel-card.siguiente {
       border-color: var(--gold);
+      border-style: dashed;
+      opacity: 0.8;
       animation: bp-pulse 2.5s ease-in-out infinite;
   }
 

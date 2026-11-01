@@ -1,7 +1,7 @@
-function calcularNivel(puntos) {
+function calcularNivel(xp) {
     let nivelAlcanzado = 0;
     for(let i = 0; i < NIVELES_BATTLE_PASS.length; i++) {
-        if (puntos >= NIVELES_BATTLE_PASS[i].xpRequerido) {
+        if (xp >= NIVELES_BATTLE_PASS[i].xpRequerido) {
             nivelAlcanzado = NIVELES_BATTLE_PASS[i].nivel;
         }
     }
@@ -24,7 +24,8 @@ function finalizarCiclo() {
     const puntosMono = Storage.load('puntos_mono') || 0;
     const puntosOso = Storage.load('puntos_oso') || 0;
     const puntosConjuntos = puntosMono + puntosOso;
-    const nivel = calcularNivel(puntosConjuntos);
+    const xpConjunta = (Storage.load('xp_mono') || 0) + (Storage.load('xp_oso') || 0);
+    const nivel = calcularNivel(xpConjunta);
     const hoy = new Date().toISOString().slice(0, 10);
 
     const registro = getRegistroCiclos();
@@ -66,7 +67,9 @@ function renderizarCiclos() {
     const puntosMono = Storage.load('puntos_mono') || 0;
     const puntosOso = Storage.load('puntos_oso') || 0;
     const puntosConjuntos = puntosMono + puntosOso;
-    const nivelActual = calcularNivel(puntosConjuntos);
+    const xpConjunta = (Storage.load('xp_mono') || 0) + (Storage.load('xp_oso') || 0);
+    const nivelActual = calcularNivel(xpConjunta);
+    const nivelObj = NIVELES_BATTLE_PASS.find(n => n.nivel === nivelActual);
     const hoy = new Date();
     const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).toISOString().slice(0, 10);
 
@@ -75,9 +78,9 @@ function renderizarCiclos() {
     document.getElementById('ciclo-puntos-mono-valor').textContent = '🐵 ' + puntosMono;
     document.getElementById('ciclo-puntos-oso-valor').textContent = '🐻 ' + puntosOso;
     document.getElementById('ciclo-puntos-valor').textContent = '💰 ' + puntosConjuntos;
-    document.getElementById('ciclo-nivel-badge').textContent = nivelActual === 0
-        ? 'Sin nivel'
-        : NIVELES_BATTLE_PASS[nivelActual - 1].icono + ' ' + NIVELES_BATTLE_PASS[nivelActual - 1].nombre;
+    document.getElementById('ciclo-nivel-badge').textContent = nivelObj
+        ? nivelObj.icono + ' ' + nivelObj.nombre
+        : 'Sin nivel';
     
     let html = '';
       if (registro.length === 0) {
@@ -114,6 +117,25 @@ function confirmarFinalizarCiclo() {
   function confirmarYFinalizar() {
       finalizarCiclo();
       cerrarModalFinalizarCiclo();
+      renderizarCiclos();
+      actualizarDisplayPuntos();
+  }
+
+  function confirmarReiniciarNenurios() {
+      document.getElementById('modal-reiniciar-nenurios').classList.remove('hidden');
+  }
+
+  function cerrarModalReiniciarNenurios() {
+      document.getElementById('modal-reiniciar-nenurios').classList.add('hidden');
+  }
+
+  function reiniciarNenurios() {
+      Storage.save('puntos_mono', 0);
+      Storage.save('puntos_oso', 0);
+      Storage.save('nenurios_gastados', 0);
+      // Evita que el recálculo al cargar la app devuelva los Nenurios de antes del reinicio
+      Storage.save('nenurios_reiniciados_fecha', fechaHoy());
+      cerrarModalReiniciarNenurios();
       renderizarCiclos();
       actualizarDisplayPuntos();
   }

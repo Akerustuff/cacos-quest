@@ -13,6 +13,15 @@ let modoEdicionMisionesActivo = false;
     return `${year}-${month}-${day}`;
   }
 
+function diaSiguiente(fecha) {
+    const siguiente = new Date(fecha + 'T00:00:00');
+    siguiente.setDate(siguiente.getDate() + 1);
+    const year = siguiente.getFullYear();
+    const month = String(siguiente.getMonth() + 1).padStart(2, '0');
+    const day = String(siguiente.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 function getKeyDiarias(){
     return 'estado_diarias_' + fechaHoy();
 }
@@ -145,7 +154,7 @@ function renderizarMisiones() {
         const jugador = Players.current;
 
         html += '<h3>Personales</h3>';
-        MISIONES_DIARIAS_PERSONALES.forEach(mision => {
+        MISIONES_DIARIAS_PERSONALES.filter(mision => !mision.oculta).forEach(mision => {
             html += buildMisionCard(mision, keyPersonales, estadoPersonales);
         });
         misionesCustom
@@ -321,7 +330,9 @@ function renderizarMisiones() {
       }
   }
 
-  function recalcularPuntosDesdeEstado(datos) {
+  // fechaMinima (opcional, 'YYYY-MM-DD'): solo cuenta los periodos (día, semana o mes)
+  // que comienzan en esa fecha o después
+  function recalcularPuntosDesdeEstado(datos, fechaMinima) {
     const mapaPuntos = {};
     const mapaCompartida = {};
 
@@ -373,6 +384,18 @@ function renderizarMisiones() {
         clavesActivas.push('estado_diarias_pers_oso_' + fecha);
     });
 
+    // Fecha en que comienza el periodo de cada clave: día, lunes de la semana o primer día del mes
+    function inicioDelPeriodo(key) {
+        var fecha = key.match(/\d{4}-\d{2}(-\d{2})?$/)[0];
+        return fecha.length === 7 ? fecha + '-01' : fecha;
+    }
+
+    if (fechaMinima) {
+        clavesActivas = clavesActivas.filter(function(key) {
+            return inicioDelPeriodo(key) >= fechaMinima;
+        });
+    }
+
     var totales = { mono: 0, oso: 0 };
 
     clavesActivas.forEach(function(key) {
@@ -405,7 +428,7 @@ function renderizarMisiones() {
     });
 
     // Buffs del grupo semanal activo
-    var estadoSemanales = datos[getKeySemanales()];
+    var estadoSemanales = clavesActivas.includes(getKeySemanales()) ? datos[getKeySemanales()] : null;
     if (estadoSemanales) {
         MISIONES_SEMANALES_GRUPALES.forEach(function(grupo) {
             var jugadoresParticipantes = new Set();

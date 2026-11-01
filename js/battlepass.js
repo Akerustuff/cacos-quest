@@ -77,7 +77,7 @@ function renderizarBattlepass() {
                       <div class="bp-barra-fill" style="width: ${desbloqueado ? 100 : porcentaje}%"></div>
                   </div>
                   <div class="bp-nivel-progreso-txt">
-                      ${desbloqueado ? '✅ Desbloqueado' : xpTotal + ' / ' + nivel.xpRequerido + ' XP'}
+                      ${desbloqueado ? '✅ Desbloqueado' : '🔒 ' + xpTotal + ' / ' + nivel.xpRequerido + ' XP'}
                   </div>
                   <div class="bp-premios-lista">
                       ${premiosHtml}
