@@ -307,7 +307,7 @@ function obtenerMisionesNoCompletadas() {                                       
 
       // Diarias personales no completadas ayer
       const keyDiariasPersonales = `estado_diarias_pers_${jugador}_${ayer}`;
-      MISIONES_DIARIAS_PERSONALES.filter(Boolean).forEach(mision => {
+      MISIONES_DIARIAS_PERSONALES.filter(mision => mision && !mision.oculta).forEach(mision => {
           if (!estadoDiariasPersonales[mision.id]) {
               resultado.push({ id: mision.id, nombre: mision.nombre, puntos: mision.puntos, tipo: 'diaria_personal', key: keyDiariasPersonales, compartida: false });
           }

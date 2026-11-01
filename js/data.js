@@ -7,7 +7,9 @@ const MISIONES_DIARIAS_PERSONALES = [,
     { id: 'cenar', nombre: 'Sustento Vespertino', desc: 'Cenar comida casera', puntos: 1 },
     { id: 'acostarse_temprano', nombre: 'Retirada al Santuario del Sueño', desc: 'Acostarse temprano (hora acordada)', puntos: 1 },
     { id: 'tomar_agua', nombre: 'Elixir de la Vitalidad Infinita', desc: 'Tomar 2 litros de agua al día', puntos: 1 },
-    { id: 'ejercicio_activacion', nombre: 'Sintonía del Guerrero', desc: 'Ejercicios de activación/estiramiento (15 min)', puntos: 1 },
+    // Oculta en la vista: se mantiene solo para no perder los puntos ya registrados
+    { id: 'ejercicio_activacion', nombre: 'Sintonía del Guerrero', desc: 'Ejercicios de activación/estiramiento (15 min)', puntos: 1, oculta: true },
+    { id: 'caminar_diez_mil_pasos', nombre: 'La Senda del Caminante', desc: 'Caminar al menos 10 mil pasos', puntos: 5 },
     { id: 'skin_care', nombre: 'Aplicación de Hechizo Protector', desc: 'Skin care diario', puntos: 1 }
 ];
 

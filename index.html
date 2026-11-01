@@ -27,7 +27,7 @@
   <!-- PANTALLA: Login -->
   <div id="screen-login" class="screen hidden">
     <div class="login-titulo">Cacos Quest</div>
-    <div class="login-version">v3.15</div>
+    <div class="login-version">v3.16</div>
     <div class="login-subtitulo">Inicia sesión para continuar</div>
     <button class="login-btn-google" onclick="loginConGoogle()">
       <span>🔑</span> Entrar con Google
@@ -81,7 +81,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.15</span>
+        <span class="menu-logo-version">v3.16</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -130,7 +130,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.15</span>
+        <span class="menu-logo-version">v3.16</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -162,7 +162,7 @@
         <div class="menu-logo">
           <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
           <span class="menu-logo-texto">Cacos Quest</span>
-          <span class="menu-logo-version">v3.15</span>
+          <span class="menu-logo-version">v3.16</span>
         </div>
         <div class="menu-jugador-wrap">
           <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -215,7 +215,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.15</span>
+        <span class="menu-logo-version">v3.16</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -245,6 +245,7 @@
         <span class="ciclo-puntos-total"><span id="ciclo-nivel-badge" class="bp-nivel-badge">Sin nivel</span></span>
       </div>
       <button class="finalizar-ciclo-btn" onclick="confirmarFinalizarCiclo()">Finalizar Ciclo</button>
+      <button class="finalizar-ciclo-btn" onclick="confirmarReiniciarNenurios()">Reiniciar Nenurios</button>
     </div>
     <h3 class="ciclos-titulo-registro">Historial</h3>
     <div id="ciclos-registro"></div>
@@ -269,7 +270,7 @@
       <div class="menu-logo">
         <img class="menu-logo-img" src="icons/icon.svg" alt="Cacos Quest">
         <span class="menu-logo-texto">Cacos Quest</span>
-        <span class="menu-logo-version">v3.15</span>
+        <span class="menu-logo-version">v3.16</span>
       </div>
       <div class="menu-jugador-wrap">
         <button class="menu-jugador-btn" onclick="toggleMenuJugador()"></button>
@@ -403,6 +404,17 @@
       <div class="modal-btns">
         <button class="modal-btn-secundario" onclick="cerrarModalFinalizarCiclo()">Cancelar</button>
         <button class="modal-btn-primario" onclick="confirmarYFinalizar()">Finalizar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-reiniciar-nenurios" class="modal-overlay hidden">
+    <div class="modal-contenido">
+      <div class="modal-titulo">⚠️ Reiniciar Nenurios</div>
+      <p class="modal-texto">Los Nenurios de ambos jugadores volverán a 0. ¿Estás seguro?</p>
+      <div class="modal-btns">
+        <button class="modal-btn-secundario" onclick="cerrarModalReiniciarNenurios()">Cancelar</button>
+        <button class="modal-btn-primario" onclick="reiniciarNenurios()">Sí</button>
       </div>
     </div>
   </div>
