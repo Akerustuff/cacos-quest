@@ -94,17 +94,36 @@ function renderizarPresupuesto() {
   const subcategorias = cargarSubcategoriasPres();
 
   const totalGastado = gastos.reduce((suma, g) => suma + g.monto, 0);
-  const ingresosData = cargarIngresosMes(mes);
-  const totalIngresos = (ingresosData.mono || []).reduce((s, e) => s + e.monto, 0)
-                      + (ingresosData.oso  || []).reduce((s, e) => s + e.monto, 0);
+  const totalIngresos = calcularTotalIngresos(cargarIngresosMes(mes));
+  const idsCategorias = categorias.map(c => c.id);
+  const totalPlanificado = subcategorias
+    .filter(s => idsCategorias.includes(s.categoriaId))
+    .reduce((suma, s) => suma + (s.presupuesto || 0), 0);
+  const totalRestante = totalIngresos - totalGastado;
 
   renderizarIngresos();
 
   const resumen = document.getElementById('presupuesto-resumen');
   resumen.innerHTML = `
     <div class="presupuesto-resumen-titulo">Mes actual</div>
-    <div class="presupuesto-resumen-monto">${formatearPesos(totalGastado)} <span class="presupuesto-resumen-sub">gastado</span></div>
-    <div class="presupuesto-resumen-sub">quedan ${formatearPesos(Math.max(0, totalIngresos - totalGastado))} de ${formatearPesos(totalIngresos)}</div>
+    <div class="presupuesto-resumen-grid">
+      <div class="presupuesto-resumen-item">
+        <div class="presupuesto-resumen-etiqueta">Planificado</div>
+        <div class="presupuesto-resumen-valor">${formatearPesos(totalPlanificado)}</div>
+      </div>
+      <div class="presupuesto-resumen-item">
+        <div class="presupuesto-resumen-etiqueta">Ingresos</div>
+        <div class="presupuesto-resumen-valor">${formatearPesos(totalIngresos)}</div>
+      </div>
+      <div class="presupuesto-resumen-item">
+        <div class="presupuesto-resumen-etiqueta">Gastos</div>
+        <div class="presupuesto-resumen-valor">${formatearPesos(totalGastado)}</div>
+      </div>
+      <div class="presupuesto-resumen-item">
+        <div class="presupuesto-resumen-etiqueta">Restante</div>
+        <div class="presupuesto-resumen-valor${totalRestante < 0 ? ' negativo' : ''}">${totalRestante < 0 ? '-' + formatearPesos(-totalRestante) : formatearPesos(totalRestante)}</div>
+      </div>
+    </div>
   `;
 
   const body = document.getElementById('presupuesto-body');
@@ -524,10 +543,19 @@ const DISTRIBUCION_INGRESO = [
 let ingresosAbiertos = new Set();
 
 function cargarIngresosMes(mes) {
-  const data = Storage.load('presupuesto_ingresos_' + mes) || { mono: [], oso: [] };
+  const data = Storage.load('presupuesto_ingresos_' + mes) || { mono: [], oso: [], monkeingresos: [] };
   if (typeof data.mono === 'number') data.mono = data.mono > 0 ? [{ id: 'legacy_mono', titulo: 'Ingreso', monto: data.mono }] : [];
   if (typeof data.oso  === 'number') data.oso  = data.oso  > 0 ? [{ id: 'legacy_oso',  titulo: 'Ingreso', monto: data.oso  }] : [];
+  if (!Array.isArray(data.mono)) data.mono = [];
+  if (!Array.isArray(data.oso))  data.oso  = [];
+  if (!Array.isArray(data.monkeingresos)) data.monkeingresos = [];
   return data;
+}
+
+function calcularTotalIngresos(ingresos) {
+  return ['mono', 'oso', 'monkeingresos'].reduce(function(suma, clave) {
+    return suma + ingresos[clave].reduce(function(s, e) { return s + e.monto; }, 0);
+  }, 0);
 }
 
 function guardarIngresosMes(mes, ingresos) {
@@ -553,12 +581,14 @@ function renderizarIngresos() {
 
   const totalMono = (ingresos.mono || []).reduce(function(s, e) { return s + e.monto; }, 0);
   const totalOso  = (ingresos.oso  || []).reduce(function(s, e) { return s + e.monto; }, 0);
-  const total = totalMono + totalOso;
+  const totalMonke = ingresos.monkeingresos.reduce(function(s, e) { return s + e.monto; }, 0);
+  const total = totalMono + totalOso + totalMonke;
   const seccionAbierta = ingresosAbiertos.has('seccion');
 
   const jugadores = [
     { id: 'mono', emoji: '🐵', nombre: 'Mono', total: totalMono, entries: ingresos.mono || [] },
-    { id: 'oso',  emoji: '🐻', nombre: 'Oso',  total: totalOso,  entries: ingresos.oso  || [] }
+    { id: 'oso',  emoji: '🐻', nombre: 'Oso',  total: totalOso,  entries: ingresos.oso  || [] },
+    { id: 'monkeingresos', emoji: '🍌', nombre: 'Monkeingresos', total: totalMonke, entries: ingresos.monkeingresos }
   ];
 
   const realesPorRubro = DISTRIBUCION_INGRESO.map(function(d) {
@@ -631,9 +661,12 @@ let ingresoJugadorEditando = null;
 
 function abrirModalAgregarIngreso(jugadorId) {
   ingresoJugadorEditando = jugadorId;
-  const emoji  = jugadorId === 'mono' ? '🐵' : '🐻';
-  const nombre = jugadorId === 'mono' ? 'Mono' : 'Oso';
-  document.getElementById('ingreso-modal-titulo').textContent = emoji + ' Ingreso de ' + nombre;
+  const titulosModal = {
+    mono: '🐵 Ingreso de Mono',
+    oso: '🐻 Ingreso de Oso',
+    monkeingresos: '🍌 Nuevo Monkeingreso'
+  };
+  document.getElementById('ingreso-modal-titulo').textContent = titulosModal[jugadorId];
   document.getElementById('ingreso-input-titulo').value = '';
   document.getElementById('ingreso-input-monto').value  = '';
   document.getElementById('modal-agregar-ingreso').classList.add('visible');
@@ -655,7 +688,7 @@ function confirmarAgregarIngreso() {
   ingresosAbiertos.add('seccion');
   ingresosAbiertos.add(ingresoJugadorEditando);
   cerrarModalAgregarIngreso();
-  renderizarIngresos();
+  renderizarPresupuesto();
 }
 
 function eliminarIngreso(jugadorId, entradaId) {
@@ -663,7 +696,7 @@ function eliminarIngreso(jugadorId, entradaId) {
   const ingresos = cargarIngresosMes(mes);
   ingresos[jugadorId] = ingresos[jugadorId].filter(function(e) { return e.id !== entradaId; });
   guardarIngresosMes(mes, ingresos);
-  renderizarIngresos();
+  renderizarPresupuesto();
 }
 
 // ── Presupuestos Históricos ────────────────────────────────────

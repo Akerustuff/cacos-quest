@@ -2030,6 +2030,31 @@ body {
     color: var(--text2);
   }
 
+  .presupuesto-resumen-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.6rem;
+  }
+
+  .presupuesto-resumen-etiqueta {
+    font-size: 0.72rem;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .presupuesto-resumen-valor {
+    font-family: var(--font-ui);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .presupuesto-resumen-valor.negativo {
+    color: #e05c5c;
+  }
+
   .presupuesto-body {
     display: flex;
     flex-direction: column;
