@@ -101,6 +101,7 @@ function renderizarPresupuesto() {
     .reduce((suma, s) => suma + (s.presupuesto || 0), 0);
   const totalRestante = totalIngresos - totalGastado;
 
+  renderizarCuotasPendientes();
   renderizarIngresos();
 
   const resumen = document.getElementById('presupuesto-resumen');
@@ -177,7 +178,7 @@ function renderizarPresupuesto() {
                   <span class="pres-gasto-jugador">${Players.list[g.jugador]?.emoji || '👤'}</span>
                   <div class="pres-gasto-info">
                     <span class="pres-gasto-titulo">${g.titulo}</span>
-                    ${g.fecha ? `<span class="pres-gasto-fecha">${formatearFechaGasto(g.fecha)}</span>` : ''}
+                    ${g.fecha ? `<span class="pres-gasto-fecha">${formatearFechaGasto(g.fecha)}${textoCuota(g)}</span>` : ''}
                   </div>
                   <span class="pres-gasto-monto">${formatearPesos(g.monto)}</span>
                   <button class="pres-gasto-btn-eliminar" onclick="eliminarGasto('${g.id}')">🗑</button>
@@ -196,7 +197,7 @@ function renderizarPresupuesto() {
         <span class="pres-gasto-jugador">${Players.list[g.jugador]?.emoji || '👤'}</span>
         <div class="pres-gasto-info">
           <span class="pres-gasto-titulo">${g.titulo}</span>
-          ${g.fecha ? `<span class="pres-gasto-fecha">${formatearFechaGasto(g.fecha)}</span>` : ''}
+          ${g.fecha ? `<span class="pres-gasto-fecha">${formatearFechaGasto(g.fecha)}${textoCuota(g)}</span>` : ''}
         </div>
         <span class="pres-gasto-monto">${formatearPesos(g.monto)}</span>
         <button class="pres-gasto-btn-eliminar" onclick="eliminarGasto('${g.id}')">🗑</button>
@@ -463,8 +464,53 @@ function abrirModalAgregarGasto(catIdPredefinido, subcatIdPredefinido) {
   if (subcatIdPredefinido) document.getElementById('pres-gasto-select-subcategoria').value = subcatIdPredefinido;
   document.getElementById('pres-gasto-input-titulo').value = '';
   document.getElementById('pres-gasto-input-monto').value = '';
+  document.getElementById('pres-gasto-input-cuotas').value = 1;
+  document.getElementById('pres-gasto-check-proximo-mes').checked = false;
+  actualizarResumenCuotas();
   document.getElementById('pres-gasto-input-fecha').value = new Date().toISOString().slice(0, 10);
   document.getElementById('modal-agregar-gasto').classList.add('visible');
+}
+
+// ── Cuotas ─────────────────────────────────────────────────────
+
+// Suma meses a una clave "AAAA-MM". Ej: sumarMeses('2026-11', 3) → '2027-02'
+function sumarMeses(mes, cantidad) {
+  const [anio, numeroMes] = mes.split('-').map(Number);
+  const fecha = new Date(anio, numeroMes - 1 + cantidad, 1);
+  return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// Reparte el monto total en cuotas enteras; la última absorbe la diferencia del redondeo.
+// Ej: dividirEnCuotas(100000, 3) → [33333, 33333, 33334]
+function dividirEnCuotas(montoTotal, cantidadCuotas) {
+  const montoCuota = Math.floor(montoTotal / cantidadCuotas);
+  const montos = Array(cantidadCuotas).fill(montoCuota);
+  montos[cantidadCuotas - 1] = montoTotal - montoCuota * (cantidadCuotas - 1);
+  return montos;
+}
+
+// Cambia el día de una fecha "AAAA-MM-DD" al mes indicado, sin pasarse del último día del mes
+function fechaEnMes(fechaOriginal, mes) {
+  const dia = parseInt(fechaOriginal.split('-')[2]);
+  const [anio, numeroMes] = mes.split('-').map(Number);
+  const ultimoDiaDelMes = new Date(anio, numeroMes, 0).getDate();
+  return `${mes}-${String(Math.min(dia, ultimoDiaDelMes)).padStart(2, '0')}`;
+}
+
+function actualizarResumenCuotas() {
+  const cantidadCuotas = parseInt(document.getElementById('pres-gasto-input-cuotas').value) || 1;
+  const montoTotal = parseInt(document.getElementById('pres-gasto-input-monto').value) || 0;
+  const opciones = document.getElementById('pres-gasto-opciones-cuotas');
+  const resumen = document.getElementById('pres-gasto-resumen-cuotas');
+
+  opciones.style.display = cantidadCuotas > 1 ? '' : 'none';
+  resumen.textContent = cantidadCuotas > 1 && montoTotal > 0
+    ? `${cantidadCuotas} cuotas de ${formatearPesos(Math.floor(montoTotal / cantidadCuotas))}`
+    : '';
+}
+
+function textoCuota(gasto) {
+  return gasto.cuotasTotal > 1 ? ` · cuota ${gasto.cuotaNumero}/${gasto.cuotasTotal}` : '';
 }
 
 function actualizarSubcategoriasGasto() {
@@ -486,20 +532,36 @@ function confirmarAgregarGasto() {
   const categoriaId = document.getElementById('pres-gasto-select-categoria').value;
   const subcategoriaId = document.getElementById('pres-gasto-select-subcategoria').value || null;
   const fecha = document.getElementById('pres-gasto-input-fecha').value || new Date().toISOString().slice(0, 10);
+  const cantidadCuotas = Math.max(1, parseInt(document.getElementById('pres-gasto-input-cuotas').value) || 1);
+  const empiezaProximoMes = cantidadCuotas > 1 && document.getElementById('pres-gasto-check-proximo-mes').checked;
   if (!titulo || !monto) return;
 
-  const mes = obtenerMesActual();
-  const gastos = cargarGastosMes(mes);
-  gastos.push({
-    id: 'id_' + Date.now(),
-    titulo,
-    monto,
-    categoriaId,
-    subcategoriaId,
-    fecha,
-    jugador: Players.current
+  // Un gasto normal es simplemente un gasto de 1 cuota en el mes actual
+  const mesPrimeraCuota = sumarMeses(obtenerMesActual(), empiezaProximoMes ? 1 : 0);
+  const montosCuotas = dividirEnCuotas(monto, cantidadCuotas);
+  const grupoCuotasId = 'cuotas_' + Date.now();
+
+  montosCuotas.forEach((montoCuota, indice) => {
+    const mesCuota = sumarMeses(mesPrimeraCuota, indice);
+    const gastosMes = cargarGastosMes(mesCuota);
+    const gasto = {
+      id: 'id_' + Date.now() + '_' + indice,
+      titulo,
+      monto: montoCuota,
+      categoriaId,
+      subcategoriaId,
+      fecha: indice === 0 && !empiezaProximoMes ? fecha : fechaEnMes(fecha, mesCuota),
+      jugador: Players.current
+    };
+    if (cantidadCuotas > 1) {
+      gasto.grupoCuotasId = grupoCuotasId;
+      gasto.cuotaNumero = indice + 1;
+      gasto.cuotasTotal = cantidadCuotas;
+      gasto.montoTotal = monto;
+    }
+    gastosMes.push(gasto);
+    guardarGastosMes(mesCuota, gastosMes);
   });
-  guardarGastosMes(mes, gastos);
 
   categoriasPresAbiertas.add(categoriaId);
   if (subcategoriaId) subcategoriasPresAbiertas.add(subcategoriaId);
@@ -512,6 +574,27 @@ function confirmarAgregarGasto() {
 function eliminarGasto(gastoId) {
   const mes = obtenerMesActual();
   let gastos = cargarGastosMes(mes);
+  const gasto = gastos.find(g => g.id === gastoId);
+  if (!gasto) return;
+
+  // Si es una cuota, se ofrece borrar también las cuotas de los meses siguientes
+  // (las cuotas de meses anteriores ya se pagaron y se conservan en el histórico)
+  const cuotasRestantes = gasto.grupoCuotasId ? gasto.cuotasTotal - gasto.cuotaNumero : 0;
+  if (cuotasRestantes > 0) {
+    const borrarSiguientes = confirm(
+      `"${gasto.titulo}" es la cuota ${gasto.cuotaNumero}/${gasto.cuotasTotal}.\n\n` +
+      `Aceptar: eliminar esta cuota y las ${cuotasRestantes} siguientes.\n` +
+      `Cancelar: no eliminar nada.`
+    );
+    if (!borrarSiguientes) return;
+    for (let i = 1; i <= cuotasRestantes; i++) {
+      const mesSiguiente = sumarMeses(mes, i);
+      const gastosSiguiente = cargarGastosMes(mesSiguiente)
+        .filter(g => g.grupoCuotasId !== gasto.grupoCuotasId);
+      guardarGastosMes(mesSiguiente, gastosSiguiente);
+    }
+  }
+
   gastos = gastos.filter(g => g.id !== gastoId);
   guardarGastosMes(mes, gastos);
   renderizarPresupuesto();
@@ -539,6 +622,97 @@ const DISTRIBUCION_INGRESO = [
     categoriaIds: ['pcat_compras', 'pcat_entretenimiento', 'pcat_suscripciones']
   }
 ];
+
+// ── Gastos en cuotas ───────────────────────────────────────────
+
+const MESES_GRAFICO_CUOTAS = 4; // mes actual + 3 siguientes
+const NOMBRES_MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+let seccionCuotasAbierta = false;
+let mesCuotasSeleccionado = 0; // 0 = mes actual, 1 = mes siguiente, etc.
+
+function toggleSeccionCuotas() {
+  seccionCuotasAbierta = !seccionCuotasAbierta;
+  if (seccionCuotasAbierta) mesCuotasSeleccionado = 0; // al abrir, parte en el mes actual
+  renderizarCuotasPendientes();
+}
+
+function seleccionarMesCuotas(desplazamiento) {
+  mesCuotasSeleccionado = desplazamiento;
+  renderizarCuotasPendientes();
+}
+
+// Nombre de un mes a partir de su clave. Ej: '2027-01' → 'enero'
+function nombreMes(clave) {
+  return NOMBRES_MESES[parseInt(clave.split('-')[1]) - 1];
+}
+
+// Cuotas registradas en un mes, ordenadas por las que terminan antes
+function obtenerCuotasDelMes(mes) {
+  return cargarGastosMes(mes)
+    .filter(g => g.grupoCuotasId)
+    .sort((a, b) => (a.cuotasTotal - a.cuotaNumero) - (b.cuotasTotal - b.cuotaNumero));
+}
+
+function renderizarCuotasPendientes() {
+  const mesActual = obtenerMesActual();
+  const meses = Array.from({ length: MESES_GRAFICO_CUOTAS }, (_, desplazamiento) => {
+    const clave = sumarMeses(mesActual, desplazamiento);
+    const cuotas = obtenerCuotasDelMes(clave);
+    return { clave, cuotas, total: cuotas.reduce((suma, g) => suma + g.monto, 0) };
+  });
+  const totalMaximo = Math.max(1, ...meses.map(m => m.total));
+  const mesSeleccionado = meses[mesCuotasSeleccionado];
+
+  const barrasHtml = meses.map((m, desplazamiento) => `
+    <button class="pres-cuotas-columna${desplazamiento === mesCuotasSeleccionado ? ' seleccionada' : ''}"
+            onclick="seleccionarMesCuotas(${desplazamiento})">
+      <span class="pres-cuotas-barra-monto">${formatearPesos(m.total)}</span>
+      <div class="pres-cuotas-barra-fondo">
+        <div class="pres-cuotas-barra" style="height:${Math.round((m.total / totalMaximo) * 100)}%"></div>
+      </div>
+      <span class="pres-cuotas-barra-mes">${nombreMes(m.clave).slice(0, 3)}</span>
+    </button>
+  `).join('');
+
+  const filasHtml = mesSeleccionado.cuotas.length === 0
+    ? '<div class="pres-sin-gastos">Sin cuotas este mes</div>'
+    : mesSeleccionado.cuotas.map(g => `
+        <div class="pres-gasto-item">
+          <span class="pres-gasto-jugador">${Players.list[g.jugador]?.emoji || '👤'}</span>
+          <div class="pres-gasto-info">
+            <span class="pres-gasto-titulo">${g.titulo}</span>
+            <span class="pres-gasto-fecha">Cuota ${g.cuotaNumero}/${g.cuotasTotal}</span>
+          </div>
+          <span class="pres-gasto-monto">${formatearPesos(g.monto)} / ${formatearPesos(g.montoTotal || g.monto * g.cuotasTotal)}</span>
+        </div>
+      `).join('');
+
+  document.getElementById('presupuesto-cuotas').innerHTML = `
+    <div class="pres-ingresos-seccion${seccionCuotasAbierta ? ' abierta' : ''}">
+      <div class="pres-categoria-header" onclick="toggleSeccionCuotas()">
+        <span class="pres-categoria-icono">🧾</span>
+        <div class="pres-categoria-info">
+          <div class="pres-categoria-nombre">Gastos en cuotas</div>
+          <div class="pres-cuotas-subtitulo">
+            <span>Cuotas pendientes del mes (${meses[0].cuotas.length})</span>
+            <span class="pres-cuotas-subtitulo-monto">${formatearPesos(meses[0].total)}</span>
+          </div>
+        </div>
+        <span class="pres-categoria-flecha">▾</span>
+      </div>
+      <div class="pres-ingreso-panel">
+        <div class="pres-cuotas-grafico">${barrasHtml}</div>
+        <div class="pres-cuotas-lista-titulo">
+          <span>Cuotas de ${nombreMes(mesSeleccionado.clave)}</span>
+          <span class="pres-cuotas-lista-total">${formatearPesos(mesSeleccionado.total)}</span>
+        </div>
+        ${filasHtml}
+      </div>
+    </div>
+  `;
+}
 
 let ingresosAbiertos = new Set();
 
@@ -787,7 +961,7 @@ function renderizarPresupuestosHistoricos() {
                   <span class="pres-gasto-jugador">${Players.list[g.jugador]?.emoji || '👤'}</span>
                   <div class="pres-gasto-info">
                     <span class="pres-gasto-titulo">${g.titulo}</span>
-                    ${g.fecha ? `<span class="pres-gasto-fecha">${formatearFechaGasto(g.fecha)}</span>` : ''}
+                    ${g.fecha ? `<span class="pres-gasto-fecha">${formatearFechaGasto(g.fecha)}${textoCuota(g)}</span>` : ''}
                   </div>
                   <span class="pres-gasto-monto">${formatearPesos(g.monto)}</span>
                 </div>
