@@ -2196,6 +2196,131 @@ body {
     color: var(--color-texto-suave);
   }
 
+  /* Opciones de cuotas en el modal de nuevo gasto */
+  .pres-campo-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .pres-campo-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--gold);
+  }
+
+  /* Sección Gastos en cuotas */
+  .pres-cuotas-subtitulo {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: var(--font-ui);
+    font-size: 0.78rem;
+    color: var(--text2);
+  }
+
+  .pres-cuotas-subtitulo-monto {
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .pres-cuotas-grafico {
+    display: flex;
+    gap: 10px;
+    padding: 14px 16px 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .pres-cuotas-columna {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    padding: 4px 0;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: var(--font-ui);
+  }
+
+  .pres-cuotas-columna.seleccionada {
+    border-color: var(--border2);
+    background: var(--surface2);
+  }
+
+  .pres-cuotas-barra-monto {
+    font-size: 0.7rem;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+
+  .pres-cuotas-barra-fondo {
+    width: 60%;
+    height: 90px;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .pres-cuotas-barra {
+    width: 100%;
+    min-height: 2px;
+    background: var(--border2);
+    border-radius: 4px 4px 0 0;
+    transition: height 0.3s ease;
+  }
+
+  .pres-cuotas-columna.seleccionada .pres-cuotas-barra {
+    background: var(--gold);
+  }
+
+  .pres-cuotas-columna.seleccionada .pres-cuotas-barra-monto,
+  .pres-cuotas-columna.seleccionada .pres-cuotas-barra-mes {
+    color: var(--gold-l);
+  }
+
+  .pres-cuotas-barra-mes {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+
+  .pres-cuotas-lista-total {
+    color: var(--gold);
+    letter-spacing: 0;
+    font-size: 0.85rem;
+  }
+
+  .pres-cuotas-lista-titulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 16px 4px;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+
+  .pres-resumen-cuotas {
+    margin-bottom: 12px;
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    color: var(--gold);
+  }
+
   .pres-gasto-monto {
     font-family: var(--font-ui);
     font-size: 0.95rem;
